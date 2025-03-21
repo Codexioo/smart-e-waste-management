@@ -7,7 +7,7 @@ const ThankYou = () => {
   useEffect(() => {
     // ✅ Redirect to home after 3 seconds
     const timer = setTimeout(() => {
-      router.push('/screens/HomeScreen'); // ✅ Fix: Use correct path
+      router.push('../(tabs)/userdashboard'); // ✅ Fix: Use correct path
     }, 3000);
     return () => clearTimeout(timer);
   }, []);
@@ -18,7 +18,7 @@ const ThankYou = () => {
       <Text style={styles.title}>Thank You!</Text>
       <Text style={styles.subtitle}>Your pickup request is processing.</Text>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/screens/HomeScreen')}>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('../(tabs)/userdashboard')}>
         <Text style={styles.buttonText}>Go Back Home</Text>
       </TouchableOpacity>
     </View>
