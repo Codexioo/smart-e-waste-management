@@ -63,6 +63,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 10,
   },
+  downloadButton: {
+    backgroundColor: "#00A52C",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    marginTop:10,
+  },
   storeText: {
     color: "white",
     fontWeight: "600",
