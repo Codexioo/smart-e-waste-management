@@ -145,6 +145,12 @@ const styles = StyleSheet.create({
     height: 50, // Increased height to match the button style
     paddingHorizontal: 30,
   },
+  logoutButton: {
+    backgroundColor: "#8E8E93", // Customize Delete button color
+    marginLeft: 4, // Adds space between buttons
+    height: 50, // Increased height to match the button style
+    paddingHorizontal: 30,
+  },
   errorText: {
     color: "red",
     fontSize: 12,

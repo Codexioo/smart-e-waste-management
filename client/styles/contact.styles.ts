@@ -29,6 +29,7 @@ const styles = StyleSheet.create({
     fontFamily: "JetBrainsMono-Medium",
     color: COLORS.primary,
     marginBottom: 10,
+    textAlign: "center",
   },
   label: {
     fontSize: 16,
