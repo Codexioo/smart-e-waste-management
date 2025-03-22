@@ -4,6 +4,7 @@ import styles from "../../styles/login.styles";
 import { Ionicons } from "@expo/vector-icons";
 import COLORS from "../../constants/colors";
 import { Link, useRouter } from "expo-router"; // useRouter for navigation
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -27,9 +28,9 @@ export default function Login() {
   ];
 
   // Login function with field-specific validation and dummy data check
-  const handleLogin = () => {
+  const handleLogin = async () => {
     let valid = true;
-
+  
     if (!email) {
       setEmailError("Email is required.");
       valid = false;
@@ -37,9 +38,9 @@ export default function Login() {
       setEmailError("Invalid email format.");
       valid = false;
     } else {
-      setEmailError(""); // Clear error if valid
+      setEmailError("");
     }
-
+  
     if (!password) {
       setPasswordError("Password is required.");
       valid = false;
@@ -47,32 +48,38 @@ export default function Login() {
       setPasswordError("Password must be at least 6 characters.");
       valid = false;
     } else {
-      setPasswordError(""); // Clear error if valid
+      setPasswordError("");
     }
-
+  
     if (!valid) return;
-
+  
     setIsLoading(true);
-
-    // Simulate login request with dummy data
-    setTimeout(() => {
-      const user = dummyUsers.find((user) => user.email === email && user.password === password);
+  
+    // Simulate network delay
+    setTimeout(async () => {
+      const user = dummyUsers.find(
+        (user) => user.email === email && user.password === password
+      );
       setIsLoading(false);
-      
+  
       if (user) {
         alert("Login Successful!");
   
-        // Navigate based on user role
+        // ✅ Save to AsyncStorage
+        await AsyncStorage.setItem("user", JSON.stringify(user));
+  
+        // ✅ Navigate based on role
         if (user.role === "customer") {
-          router.push("/userdashboard"); // Navigate to user dashboard
+          router.replace("/(tabs)/userdashboard"); // This will go to dynamic dashboard from _layout
         } else if (user.role === "collector") {
-          router.push("/(auth)/collectordashboard"); // Navigate to collector dashboard
+          router.replace("/(auth)/collectordashboard"); // Same here
         }
       } else {
         alert("Invalid email or password.");
       }
     }, 2000);
   };
+  
 
   const router = useRouter(); // To handle navigation with `useRouter` from `expo-router`
 

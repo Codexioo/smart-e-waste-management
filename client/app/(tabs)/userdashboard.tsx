@@ -32,6 +32,13 @@ export default function UserDashboard() {
         <Text style={styles.cardTitle}>Rewarding Points</Text>
         <Text style={styles.rewardAmount}>$45,678.90</Text>
         <Text style={styles.rewardGrowth}>+20% month over month</Text>
+
+        <View style={{ alignItems: 'flex-end' }}>
+  <TouchableOpacity style={styles.downloadButton}>
+    <Text style={styles.storeText}>+ Download reward summary report</Text>
+  </TouchableOpacity>
+</View>
+
       </View>
 
       {/* Action Buttons */}
@@ -45,11 +52,10 @@ export default function UserDashboard() {
   <Text style={styles.requestText}>+ Request E-Waste Pickup</Text>
 </TouchableOpacity>
 
- 
-
         <TouchableOpacity style={styles.storeButton}>
           <Text style={styles.storeText}>+ In Store</Text>
         </TouchableOpacity>
+
       </View>
 
       {/* Pickup History */}

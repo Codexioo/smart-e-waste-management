@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import BottomTabs from "@/app/components/bottombar";
 
 const ThankYou = () => {
   useEffect(() => {
@@ -21,6 +22,9 @@ const ThankYou = () => {
       <TouchableOpacity style={styles.button} onPress={() => router.push('/screens/HomeScreen')}>
         <Text style={styles.buttonText}>Go Back Home</Text>
       </TouchableOpacity>
+
+    <BottomTabs />
+    
     </View>
   );
 };
