@@ -13,6 +13,7 @@ import {
 import axios from 'axios';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { router } from 'expo-router';
+import BottomTabs from "@/app/components/bottombar";
 
 const API_URL = 'http://192.168.8.163:9090/request-pickup'; // Update with your local IP
 
@@ -165,6 +166,8 @@ const Request = () => {
           <Text style={styles.buttonText}>Submit</Text>
         </TouchableOpacity>
 
+        <BottomTabs />
+        
       </ScrollView>
     </KeyboardAvoidingView>
   );
