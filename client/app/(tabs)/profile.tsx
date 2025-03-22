@@ -53,7 +53,7 @@ export default function Profile() {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.title}>Profile Information</Text>
+        <Text style={styles.title}>Profile Informations</Text>
 
         <Text style={styles.label}>Username</Text>
         <View style={styles.inputContainer}>
