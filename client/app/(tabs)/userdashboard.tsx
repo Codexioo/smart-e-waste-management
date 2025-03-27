@@ -1,29 +1,20 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, FlatList, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
 import { FontAwesome, Feather } from "@expo/vector-icons";
 import styles from "../../styles/dashboard.styles";
-import { useRouter } from "expo-router"; // Import useRouter to navigate
-
-const customers = [
-  { id: "1", name: "Trader", location: "Austin, TX" },
-  { id: "2", name: "Joe", location: "Austin, Tx" },
-  { id: "3", name: "John", location: "Austin, TX" },
-  { id: "4", name: "Kevin", location: "Austin, TX" },
-];
+import { useRouter } from "expo-router";
+import useProtectedRoute from "@/hooks/useProtectedRoute";
 
 export default function UserDashboard() {
+  useProtectedRoute();
   const [searchTerm, setSearchTerm] = useState("");
-
-  const router = useRouter(); // Initialize the router
-
-  // Filter customers based on searchTerm (case-insensitive)
-  const filteredCustomers = customers.filter((customer) => {
-    const term = searchTerm.toLowerCase();
-    return (
-      customer.name.toLowerCase().includes(term) ||
-      customer.location.toLowerCase().includes(term)
-    );
-  });
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
@@ -33,29 +24,27 @@ export default function UserDashboard() {
         <Text style={styles.rewardAmount}>$45,678.90</Text>
         <Text style={styles.rewardGrowth}>+20% month over month</Text>
 
-        <View style={{ alignItems: 'flex-end' }}>
-  <TouchableOpacity style={styles.downloadButton}>
-    <Text style={styles.storeText}>+ Download reward summary report</Text>
-  </TouchableOpacity>
-</View>
-
+        <View style={{ alignItems: "flex-end" }}>
+          <TouchableOpacity style={styles.downloadButton}>
+            <Text style={styles.storeText}>
+              + Download reward summary report
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
-
-
-<TouchableOpacity 
-  style={styles.requestButton}
-  onPress={() => router.push("/screens/request")}
->
-  <Text style={styles.requestText}>+ Request E-Waste Pickup</Text>
-</TouchableOpacity>
+        <TouchableOpacity
+          style={styles.requestButton}
+          onPress={() => router.push("/screens/request")}
+        >
+          <Text style={styles.requestText}>+ Request E-Waste Pickup</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity style={styles.storeButton}>
           <Text style={styles.storeText}>+ In Store</Text>
         </TouchableOpacity>
-
       </View>
 
       {/* Pickup History */}
@@ -70,20 +59,26 @@ export default function UserDashboard() {
         />
       </View>
 
+      {/* FlatList with no data for now */}
       <FlatList
-        data={filteredCustomers}
-        keyExtractor={(item) => item.id}
+        data={[]} // 🔄 will be replaced with real pickup history
+        keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
           <View style={styles.listItem}>
             <View style={styles.listItemContent}>
               <Feather name="database" size={24} color="#00A52C" />
               <View style={styles.textContainer}>
-                <Text style={styles.listTitle}>{item.name}</Text>
-                <Text style={styles.listSubtitle}>{item.location}</Text>
+                <Text style={styles.listTitle}>{}</Text>
+                <Text style={styles.listSubtitle}>{}</Text>
               </View>
             </View>
           </View>
         )}
+        ListEmptyComponent={
+          <Text style={{ textAlign: "center", marginTop: 20, color: "gray" }}>
+            No pickup history found.
+          </Text>
+        }
       />
     </View>
   );

@@ -30,6 +30,26 @@ db.serialize(() => {
       }
     }
   );
+
+  db.run(
+    `CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      telephone TEXT NOT NULL,
+      address TEXT NOT NULL,
+      role TEXT CHECK(role IN ('customer', 'collector', 'admin')) NOT NULL,
+      password TEXT NOT NULL
+    )`,
+    (err) => {
+      if (err) {
+        console.error('❌ Error creating users table:', err);
+      } else {
+        console.log('✅ Table users is ready');
+      }
+    }
+  );
+  
 });
 
 module.exports = db;

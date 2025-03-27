@@ -5,12 +5,14 @@ import { Ionicons } from "@expo/vector-icons";
 import COLORS from "../../constants/colors";
 import { Link, useRouter } from "expo-router"; // useRouter for navigation
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
+import axios from 'axios';
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter(); // To handle navigation with `useRouter` from `expo-router`
 
   // Error messages for individual fields
   const [emailError, setEmailError] = useState("");
@@ -21,67 +23,63 @@ export default function Login() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  // Dummy Users for login simulation
-  const dummyUsers = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', password: 'password123', role: 'customer' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', password: 'password456', role: 'collector' }
-  ];
+const handleLogin = async () => {
+  let valid = true;
 
-  // Login function with field-specific validation and dummy data check
-  const handleLogin = async () => {
-    let valid = true;
-  
-    if (!email) {
-      setEmailError("Email is required.");
-      valid = false;
-    } else if (!validateEmail(email)) {
-      setEmailError("Invalid email format.");
-      valid = false;
-    } else {
-      setEmailError("");
-    }
-  
-    if (!password) {
-      setPasswordError("Password is required.");
-      valid = false;
-    } else if (password.length < 6) {
-      setPasswordError("Password must be at least 6 characters.");
-      valid = false;
-    } else {
-      setPasswordError("");
-    }
-  
-    if (!valid) return;
-  
-    setIsLoading(true);
-  
-    // Simulate network delay
-    setTimeout(async () => {
-      const user = dummyUsers.find(
-        (user) => user.email === email && user.password === password
-      );
-      setIsLoading(false);
-  
-      if (user) {
-        alert("Login Successful!");
-  
-        // ✅ Save to AsyncStorage
-        await AsyncStorage.setItem("user", JSON.stringify(user));
-  
-        // ✅ Navigate based on role
-        if (user.role === "customer") {
-          router.replace("/(tabs)/userdashboard"); // This will go to dynamic dashboard from _layout
-        } else if (user.role === "collector") {
-          router.replace("/(auth)/collectordashboard"); // Same here
-        }
-      } else {
-        alert("Invalid email or password.");
-      }
-    }, 2000);
-  };
-  
+  if (!email) {
+    setEmailError("Email is required.");
+    valid = false;
+  } else if (!validateEmail(email)) {
+    setEmailError("Invalid email format.");
+    valid = false;
+  } else {
+    setEmailError("");
+  }
 
-  const router = useRouter(); // To handle navigation with `useRouter` from `expo-router`
+  if (!password) {
+    setPasswordError("Password is required.");
+    valid = false;
+  } else if (password.length < 6) {
+    setPasswordError("Password must be at least 6 characters.");
+    valid = false;
+  } else {
+    setPasswordError("");
+  }
+
+  if (!valid) return;
+
+  setIsLoading(true);
+
+  try {
+    const response = await axios.post("http://192.168.1.5:5000/login", {
+      email,
+      password,
+    });
+
+    const { token, role, user } = response.data;
+
+    // Store token & user in AsyncStorage
+    await AsyncStorage.setItem("token", token);
+    await AsyncStorage.setItem("user", JSON.stringify(user));
+    await AsyncStorage.setItem("role", role);
+
+    alert("Login Successful!");
+
+    if (role === "customer") {
+      router.replace("/(tabs)/userdashboard");
+    } else if (role === "collector") {
+      router.replace("/(auth)/collectordashboard");
+    } else if (role === "admin") {
+      //router.replace("/(auth)/admindashboard");
+    }
+
+  } catch (error: any) {
+    console.error("Login error:", error);
+    alert(error.response?.data?.error || "Login failed. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <KeyboardAvoidingView

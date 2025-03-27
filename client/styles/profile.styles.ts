@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#8E8E93", // Customize Delete button color
     marginLeft: 4, // Adds space between buttons
     height: 50, // Increased height to match the button style
-    paddingHorizontal: 30,
+    paddingHorizontal: 3,
   },
   errorText: {
     color: "red",
