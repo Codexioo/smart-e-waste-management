@@ -1,4 +1,4 @@
-const db = require('../database/database');
+const db = require('../database');
 
 const insertRequest = (data, callback) => {
   const { location, address, district, city } = data;
