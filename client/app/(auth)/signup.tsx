@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import COLORS from "@/constants/colors";
 import { useRouter } from "expo-router";
 import DropDownPicker from "react-native-dropdown-picker";
-import axios from 'axios';
+import axios from "../../api/axiosInstance";
 
 
 export default function Signup() {
@@ -106,7 +106,7 @@ export default function Signup() {
     setIsLoading(true);
   
     try {
-      const response = await axios.post('http://192.168.1.5:5000/signup', {
+      const response = await axios.post('/signup', {
         username,
         email,
         telephone,

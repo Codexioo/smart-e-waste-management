@@ -12,7 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import COLORS from "../../constants/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import axios from "axios";
+import axios from "../../api/axiosInstance";
 import useProtectedRoute from "@/hooks/useProtectedRoute";
 
 export default function Profile() {
@@ -38,7 +38,7 @@ export default function Profile() {
           return;
         }
 
-        const response = await axios.get("http://192.168.1.5:5000/profile", {
+        const response = await axios.get("/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -68,7 +68,7 @@ export default function Profile() {
       const token = await AsyncStorage.getItem("token");
   
       const response = await axios.put(
-        "http://192.168.1.5:5000/profile",
+        "/profile",
         {
           username: name,
           telephone,
@@ -116,7 +116,7 @@ export default function Profile() {
               setIsLoading(true);
               const token = await AsyncStorage.getItem("token");
 
-              await axios.delete("http://192.168.1.5:5000/profile", {
+              await axios.delete("/profile", {
                 headers: { Authorization: `Bearer ${token}` },
               });
 

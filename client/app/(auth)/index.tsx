@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import COLORS from "../../constants/colors";
 import { Link, useRouter } from "expo-router"; // useRouter for navigation
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
-import axios from 'axios';
+import axios from "../../api/axiosInstance";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -51,7 +51,7 @@ const handleLogin = async () => {
   setIsLoading(true);
 
   try {
-    const response = await axios.post("http://192.168.1.5:5000/login", {
+    const response = await axios.post("/login", {
       email,
       password,
     });
