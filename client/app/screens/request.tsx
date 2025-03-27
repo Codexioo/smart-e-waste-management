@@ -163,7 +163,7 @@ const Request = () => {
 
         {/* Submit Button */}
         <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Submit</Text>
+          <Text style={styles.buttonText}>Confirm</Text>
         </TouchableOpacity>
 
         <BottomTabs />
