@@ -6,12 +6,16 @@ const signupRoutes = require('./routes/signupRoutes');
 const loginRoutes = require('./routes/loginRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 
+//maleen's routes
+const authRoutes = require('./routes/authRoutes');
+const rewardRoutes = require('./routes/rewardRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const productRoutes = require('./routes/productRoutes');
+
 
 const app = express();
-const PORT = 5000;
+const PORT = 3001;
 
-
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -20,6 +24,13 @@ app.use('/', pickupRoutes);
 app.use('/', signupRoutes);
 app.use('/', loginRoutes);
 app.use('/', profileRoutes);
+
+//maleen's routes
+app.use('/api', authRoutes);
+app.use('/api', rewardRoutes);
+app.use('/api', orderRoutes);
+app.use('/api', productRoutes);
+
 
 // Start Server
 app.listen(PORT, () => {
