@@ -15,7 +15,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { router } from 'expo-router';
 import BottomTabs from "@/app/components/bottombar";
 
-const API_URL = 'http://192.168.8.163:9090/request-pickup'; // Update with your local IP
+const API_URL = 'http://172.20.10.8:9090/request-pickup'; // Update with your local IP
 
 const sriLankanDistricts = [
   { label: 'Colombo', value: 'Colombo' },
@@ -163,7 +163,7 @@ const Request = () => {
 
         {/* Submit Button */}
         <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Submit</Text>
+          <Text style={styles.buttonText}>Confirm</Text>
         </TouchableOpacity>
 
         <BottomTabs />

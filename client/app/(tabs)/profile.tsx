@@ -1,54 +1,156 @@
-import { View, Text, TouchableOpacity, ActivityIndicator, TextInput } from "react-native";
-import React, { useState, useEffect } from "react"; // ✅ Import useEffect here
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  TextInput,
+  Alert,
+} from "react-native";
+import React, { useState, useEffect } from "react";
 import styles from "../../styles/profile.styles";
 import { Ionicons } from "@expo/vector-icons";
 import COLORS from "../../constants/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-
+import axios from "axios";
+import useProtectedRoute from "@/hooks/useProtectedRoute";
 
 export default function Profile() {
+  useProtectedRoute();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [telephone, setTelephone] = useState("");
   const [address, setAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
 
-  const handleEdit = () => {};
-  const handleDelete = () => {};
   const router = useRouter();
 
-  // ✅ Load user info from AsyncStorage
   useEffect(() => {
-    const loadUser = async () => {
-      const storedUser = await AsyncStorage.getItem("user");
-      if (storedUser) {
-        const user = JSON.parse(storedUser);
-        setName(user.name);
-        setEmail(user.email);
-
-        // ✅ Set dummy details based on role
-        if (user.role === "customer") {
-          setTelephone("0771234567");
-          setAddress("No. 12, Main Street, Colombo");
-        } else if (user.role === "waste_collector") {
-          setTelephone("0779876543");
-          setAddress("No. 55, Collection Road, Galle");
+    const fetchProfile = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) {
+          alert("Unauthorized. Please login again.");
+          router.replace("/(auth)");
+          return;
         }
+
+        const response = await axios.get("http://192.168.1.5:5000/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const user = response.data;
+        setName(user.username);
+        setEmail(user.email);
+        setTelephone(user.telephone);
+        setAddress(user.address);
+      } catch (error) {
+        console.error("Profile load error:", error);
+        alert("Failed to load profile.");
+      } finally {
+        setIsProfileLoading(false);
       }
     };
 
-    loadUser();
+    fetchProfile();
   }, []);
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleSave = async () => {
+    try {
+      setIsLoading(true);
+      const token = await AsyncStorage.getItem("token");
+  
+      const response = await axios.put(
+        "http://192.168.1.5:5000/profile",
+        {
+          username: name,
+          telephone,
+          address,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+  
+      // ✅ Update AsyncStorage with new user data
+      const updatedUser = {
+        ...(JSON.parse(await AsyncStorage.getItem("user") || "{}")),
+        username: name,
+        telephone,
+        address,
+      };
+      await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+  
+      // ✅ Show success confirmation
+      Alert.alert("Success", "Your profile was updated successfully!");
+  
+      // ✅ Exit edit mode
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Save error:", error);
+      alert("Failed to update profile.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+
+  const handleDelete = () => {
+    Alert.alert(
+      "Delete Account",
+      "Are you sure you want to delete your account? This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Yes, Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setIsLoading(true);
+              const token = await AsyncStorage.getItem("token");
+
+              await axios.delete("http://192.168.1.5:5000/profile", {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+
+              await AsyncStorage.multiRemove(["user", "token", "role"]);
+              alert("Account deleted.");
+              router.replace("/(auth)");
+            } catch (error) {
+              console.error("Delete error:", error);
+              alert("Failed to delete account.");
+            } finally {
+              setIsLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const handleLogout = async () => {
     try {
-      await AsyncStorage.removeItem("user"); // Clear user from storage
-      router.replace("/(auth)"); // Redirect to login screen (assuming it's index.tsx)
+      await AsyncStorage.multiRemove(["user", "token", "role"]);
+      router.replace("/(auth)");
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
+
+  if (isProfileLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -58,40 +160,77 @@ export default function Profile() {
         <Text style={styles.label}>Username</Text>
         <View style={styles.inputContainer}>
           <Ionicons name="person-outline" size={20} color={COLORS.primary} />
-          <TextInput style={styles.input} value={name} editable={false} />
+          <TextInput
+            style={styles.input}
+            value={name}
+            onChangeText={setName}
+            editable={isEditing}
+          />
         </View>
 
         <Text style={styles.label}>Email</Text>
         <View style={styles.inputContainer}>
           <Ionicons name="mail-outline" size={20} color={COLORS.primary} />
-          <TextInput style={styles.input} value={email} editable={false} />
+          <TextInput
+            style={styles.input}
+            value={email}
+            editable={false}
+          />
         </View>
 
         <Text style={styles.label}>Telephone</Text>
         <View style={styles.inputContainer}>
           <Ionicons name="call-outline" size={20} color={COLORS.primary} />
-          <TextInput style={styles.input} value={telephone} editable={false} />
+          <TextInput
+            style={styles.input}
+            value={telephone}
+            onChangeText={setTelephone}
+            editable={isEditing}
+          />
         </View>
 
         <Text style={styles.label}>Address</Text>
         <View style={styles.inputContainer}>
           <Ionicons name="home-outline" size={20} color={COLORS.primary} />
-          <TextInput style={styles.input} value={address} editable={false} />
+          <TextInput
+            style={styles.input}
+            value={address}
+            onChangeText={setAddress}
+            editable={isEditing}
+          />
         </View>
 
         {/* Buttons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, styles.editButton]}
-            onPress={handleEdit}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
+          {isEditing ? (
+            <>
+              <TouchableOpacity
+                style={[styles.button, styles.editButton]}
+                onPress={handleSave}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Save</Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.button, styles.deleteButton]}
+                onPress={() => setIsEditing(false)}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <TouchableOpacity
+              style={[styles.button, styles.editButton]}
+              onPress={handleEdit}
+            >
               <Text style={styles.buttonText}>Edit</Text>
-            )}
-          </TouchableOpacity>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity
             style={[styles.button, styles.deleteButton]}
@@ -106,12 +245,11 @@ export default function Profile() {
           </TouchableOpacity>
 
           <TouchableOpacity
-          style={[styles.button, styles.logoutButton]}
-          onPress={handleLogout}
+            style={[styles.button, styles.logoutButton]}
+            onPress={handleLogout}
           >
-          <Text style={styles.buttonText}>Logout</Text>
+            <Text style={styles.buttonText}>Logout</Text>
           </TouchableOpacity>
-
         </View>
       </View>
     </View>

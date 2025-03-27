@@ -13,6 +13,8 @@ import { Ionicons } from "@expo/vector-icons";
 import COLORS from "@/constants/colors";
 import { useRouter } from "expo-router";
 import DropDownPicker from "react-native-dropdown-picker";
+import axios from 'axios';
+
 
 export default function Signup() {
   const [username, setUsername] = useState("");
@@ -41,7 +43,7 @@ export default function Signup() {
 
   const router = useRouter();
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     setErrors({
       username: "",
       email: "",
@@ -50,15 +52,16 @@ export default function Signup() {
       password: "",
       selectedRole: "",
     });
-
+  
     let valid = true;
     let newErrors: any = {};
-
+  
+    // ✅ Validation logic (unchanged)
     if (!username.trim()) {
       newErrors.username = "Username is required.";
       valid = false;
     }
-
+  
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.trim()) {
       newErrors.email = "Email is required.";
@@ -67,7 +70,7 @@ export default function Signup() {
       newErrors.email = "Enter a valid email.";
       valid = false;
     }
-
+  
     const phoneRegex = /^[0-9]{10}$/;
     if (!telephone.trim()) {
       newErrors.telephone = "Telephone is required.";
@@ -76,12 +79,12 @@ export default function Signup() {
       newErrors.telephone = "Enter a valid 10-digit phone number.";
       valid = false;
     }
-
+  
     if (!address.trim()) {
       newErrors.address = "Address is required.";
       valid = false;
     }
-
+  
     if (!password) {
       newErrors.password = "Password is required.";
       valid = false;
@@ -89,25 +92,43 @@ export default function Signup() {
       newErrors.password = "Password must be at least 6 characters.";
       valid = false;
     }
-
+  
     if (!selectedRole) {
       newErrors.selectedRole = "Please select a role.";
       valid = false;
     }
-
+  
     if (!valid) {
       setErrors(newErrors);
       return;
     }
-
+  
     setIsLoading(true);
-
-    setTimeout(() => {
+  
+    try {
+      const response = await axios.post('http://192.168.1.5:5000/signup', {
+        username,
+        email,
+        telephone,
+        address,
+        password,
+        role: selectedRole === "waste_collector" ? "collector" : selectedRole, // Normalize role
+      });
+  
       setIsLoading(false);
       alert("Signup Successful!");
       router.push("/(auth)");
-    }, 2000);
+    } catch (error: any) {
+      setIsLoading(false);
+      if (error.response?.data?.error === "Email already exists") {
+        alert("This email is already registered.");
+      } else {
+        console.error("Signup error:", error);
+        alert("Signup failed. Please try again.");
+      }
+    }
   };
+  
 
   return (
     <KeyboardAvoidingView
