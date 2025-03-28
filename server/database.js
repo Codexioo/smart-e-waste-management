@@ -14,22 +14,23 @@ const db = new sqlite3.Database(dbPath, (err) => {
 
 // 🟢 Ensure table exists with the correct columns
 db.serialize(() => {
-  db.run(
-    `CREATE TABLE IF NOT EXISTS pickup_requests (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      location TEXT NULL,
-      address TEXT NOT NULL,
-      district TEXT NOT NULL,
-      city TEXT NOT NULL
-    )`,
-    (err) => {
-      if (err) {
-        console.error('❌ Error creating table:', err);
-      } else {
-        console.log('✅ Table pickup_requests is ready');
+    db.run(
+      `CREATE TABLE IF NOT EXISTS pickup_requests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        location TEXT,
+        address TEXT NOT NULL,
+        district TEXT NOT NULL,
+        city TEXT NOT NULL,
+        user_id INTEGER NOT NULL
+      )`,
+      (err) => {
+        if (err) {
+          console.error('❌ Error creating pickup_requests table:', err);
+        } else {
+          console.log('✅ pickup_requests table created with user_id');
+        }
       }
-    }
-  );
+    );
 
   db.run(
     `CREATE TABLE IF NOT EXISTS users (
