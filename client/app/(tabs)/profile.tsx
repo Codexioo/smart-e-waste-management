@@ -102,39 +102,60 @@ export default function Profile() {
   };
   
 
-  const handleDelete = () => {
-    Alert.alert(
-      "Delete Account",
-      "Are you sure you want to delete your account? This action cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Yes, Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              setIsLoading(true);
-              const token = await AsyncStorage.getItem("token");
+  // const handleDelete = () => {
+  //   Alert.alert(
+  //     "Delete Account",
+  //     "Are you sure you want to delete your account? This action cannot be undone.",
+  //     [
+  //       { text: "Cancel", style: "cancel" },
+  //       {
+  //         text: "Yes, Delete",
+  //         style: "destructive",
+  //         onPress: async () => {
+  //           try {
+  //             setIsLoading(true);
+  //             const token = await AsyncStorage.getItem("token");
 
-              await axios.delete("/profile", {
-                headers: { Authorization: `Bearer ${token}` },
-              });
+  //             await axios.delete("/profile", {
+  //               headers: { Authorization: `Bearer ${token}` },
+  //             });
 
-              await AsyncStorage.multiRemove(["user", "token", "role"]);
-              alert("Account deleted.");
-              router.replace("/(auth)");
-            } catch (error) {
-              console.error("Delete error:", error);
-              alert("Failed to delete account.");
-            } finally {
-              setIsLoading(false);
-            }
-          },
-        },
-      ]
-    );
+  //             await AsyncStorage.multiRemove(["user", "token", "role"]);
+  //             alert("Account deleted.");
+  //             router.replace("/(auth)");
+  //           } catch (error) {
+  //             console.error("Delete error:", error);
+  //             alert("Failed to delete account.");
+  //           } finally {
+  //             setIsLoading(false);
+  //           }
+  //         },
+  //       },
+  //     ]
+  //   );
+  // };
+
+  const handleDelete = async () => {
+    console.log("🧨 Delete button pressed");
+    try {
+      setIsLoading(true);
+      const token = await AsyncStorage.getItem("token");
+  
+      await axios.delete("/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      await AsyncStorage.multiRemove(["user", "token", "role"]);
+      alert("Account deleted.");
+      router.replace("/(auth)");
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Failed to delete account.");
+    } finally {
+      setIsLoading(false);
+    }
   };
-
+  
   const handleLogout = async () => {
     try {
       await AsyncStorage.multiRemove(["user", "token", "role"]);
