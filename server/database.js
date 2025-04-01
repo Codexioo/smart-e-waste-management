@@ -2,8 +2,6 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
 const dbPath = path.resolve(__dirname, 'database.sqlite');
-
-// Connect to SQLite database
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('❌ Error connecting to SQLite:', err);
@@ -12,25 +10,133 @@ const db = new sqlite3.Database(dbPath, (err) => {
   }
 });
 
-// 🟢 Ensure table exists with the correct columns
 db.serialize(() => {
-    db.run(
-      `CREATE TABLE IF NOT EXISTS pickup_requests (
+  const sqlite3 = require('sqlite3').verbose();
+  const path = require('path');
+  
+  const dbPath = path.resolve(__dirname, 'database.sqlite');
+  const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+      console.error('❌ Error connecting to SQLite:', err);
+    } else {
+      console.log('✅ Connected to SQLite database');
+    }
+  });
+  
+  // 🟢 Create Tables
+  db.serialize(() => {
+    // USERS
+    db.run(`
+      CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        location TEXT,
+        username TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        telephone TEXT NOT NULL,
+        address TEXT NOT NULL,
+        role TEXT CHECK(role IN ('customer', 'collector', 'admin')) NOT NULL,
+        password TEXT NOT NULL,
+        otp_verified BOOLEAN DEFAULT 0,
+        total_reward_points INTEGER DEFAULT 0
+      )
+    `, (err) => {
+      if (err) console.error('❌ Error creating users table:', err);
+      else console.log('✅ Table users is ready');
+    });
+  
+    // PICKUP REQUESTS
+    db.run(`
+      CREATE TABLE IF NOT EXISTS pickup_requests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         address TEXT NOT NULL,
         district TEXT NOT NULL,
         city TEXT NOT NULL,
-        user_id INTEGER NOT NULL
-      )`,
-      (err) => {
-        if (err) {
-          console.error('❌ Error creating pickup_requests table:', err);
-        } else {
-          console.log('✅ pickup_requests table created with user_id');
-        }
-      }
-    );
+        waste_types TEXT NOT NULL,
+        create_date TEXT NOT NULL,
+        status TEXT CHECK(status IN ('pending', 'Accepted', 'Rejected', 'completed')) NOT NULL,
+        user_id INTEGER NOT NULL,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+      )
+    `, (err) => {
+      if (err) console.error('❌ Error creating pickup_requests table:', err);
+      else console.log('✅ Table pickup_requests is ready');
+    });
+  
+    // WASTE COLLECTIONS
+    db.run(`
+      CREATE TABLE IF NOT EXISTS waste_collections (
+        collection_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        waste_type TEXT,
+        waste_weight REAL,
+        collection_date TEXT,
+        reward_points INTEGER,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+      )
+    `, (err) => {
+      if (err) console.error('❌ Error creating waste_collections table:', err);
+      else console.log('✅ Table waste_collections is ready');
+    });
+  
+    // REWARD HISTORY
+    db.run(`
+      CREATE TABLE IF NOT EXISTS reward_history (
+        transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        points INTEGER,
+        transaction_type TEXT,
+        transaction_date TEXT,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+      )
+    `, (err) => {
+      if (err) console.error('❌ Error creating reward_history table:', err);
+      else console.log('✅ Table reward_history is ready');
+    });
+  
+    // PRODUCTS
+    db.run(`
+      CREATE TABLE IF NOT EXISTS products (
+        product_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_name TEXT,
+        product_desc TEXT,
+        price INTEGER,
+        stock_quantity INTEGER
+      )
+    `, (err) => {
+      if (err) console.error('❌ Error creating products table:', err);
+      else console.log('✅ Table products is ready');
+    });
+  
+    // ORDERS
+    db.run(`
+      CREATE TABLE IF NOT EXISTS orders (
+        order_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        total_points_used INTEGER,
+        purchase_date TEXT,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+      )
+    `, (err) => {
+      if (err) console.error('❌ Error creating orders table:', err);
+      else console.log('✅ Table orders is ready');
+    });
+  
+    // ORDER ITEMS
+    db.run(`
+      CREATE TABLE IF NOT EXISTS order_items (
+        order_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        order_id INTEGER,
+        product_id INTEGER,
+        quantity INTEGER,
+        FOREIGN KEY(order_id) REFERENCES orders(order_id),
+        FOREIGN KEY(product_id) REFERENCES products(product_id)
+      )
+    `, (err) => {
+      if (err) console.error('❌ Error creating order_items table:', err);
+      else console.log('✅ Table order_items is ready');
+    });
+  });
+  
+  module.exports = db;
 
   db.run(
     `CREATE TABLE IF NOT EXISTS users (

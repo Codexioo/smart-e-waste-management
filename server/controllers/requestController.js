@@ -1,14 +1,14 @@
 const { insertRequest, getRequestsByUserId } = require('../models/requestModel');
 
-// Handle a new pickup request
+// User submits pickup request (status will be 'pending' by default)
 const handlePickupRequest = (req, res) => {
-  const { location, address, district, city, user_id } = req.body;
+  const { address, district, city, user_id, waste_types } = req.body;
 
-  if (!location || !address || !district || !city || !user_id) {
-    return res.status(400).json({ error: 'All fields are required including user_id' });
+  if (!address || !district || !city || !user_id || !waste_types || !waste_types.length) {
+    return res.status(400).json({ error: 'All fields are required including waste_types' });
   }
 
-  insertRequest({ location, address, district, city, user_id }, (err, result) => {
+  insertRequest({ address, district, city, user_id, waste_types }, (err, result) => {
     if (err) {
       console.error('❌ DB Insert Error:', err);
       return res.status(500).json({ error: 'Failed to insert request' });
@@ -17,7 +17,6 @@ const handlePickupRequest = (req, res) => {
   });
 };
 
-// Fetch all pickup requests for a specific user
 const fetchRequestsByUser = (req, res) => {
   const userId = req.params.userId;
 
@@ -29,7 +28,6 @@ const fetchRequestsByUser = (req, res) => {
   });
 };
 
-// ✅ Export both at once
 module.exports = {
   handlePickupRequest,
   fetchRequestsByUser,
