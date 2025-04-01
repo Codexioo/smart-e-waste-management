@@ -111,6 +111,11 @@ const styles = StyleSheet.create({
   listSubtitle: {
     color: "#00A52C",
   },
+  statusText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#4CAF50', // or change based on status if needed
+  },
 });
 
 export default styles;
