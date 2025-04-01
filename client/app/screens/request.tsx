@@ -10,12 +10,14 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
-import axios from 'axios';
+
 import DropDownPicker from 'react-native-dropdown-picker';
 import { router } from 'expo-router';
-import BottomTabs from "@/app/components/bottombar";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import BottomTabs from '@/components/bottombar';
+import axios from "../../api/axiosInstance";
 
-const API_URL = 'http://172.20.10.8:9090/request-pickup'; // Update with your local IP
+const API_URL = '/request-pickup'; // <-- Replace with your IP
 
 const sriLankanDistricts = [
   { label: 'Colombo', value: 'Colombo' },
@@ -39,6 +41,7 @@ const Request = () => {
     address: '',
     district: null,
     city: null,
+    user_id: null,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -46,7 +49,22 @@ const Request = () => {
   const [openCity, setOpenCity] = useState(false);
   const [cityList, setCityList] = useState<{ label: string; value: string }[]>([]);
 
-  // ✅ Update City List when District Changes
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const userData = await AsyncStorage.getItem('user');
+        if (userData) {
+          const user = JSON.parse(userData);
+          setForm((prev) => ({ ...prev, user_id: user.id }));
+        }
+      } catch (err) {
+        console.error("Failed to load user from storage:", err);
+      }
+    };
+
+    getUser();
+  }, []);
+
   useEffect(() => {
     if (form.district && Object.prototype.hasOwnProperty.call(citiesByDistrict, form.district)) {
       const cities = citiesByDistrict[form.district] || [];
@@ -58,7 +76,6 @@ const Request = () => {
     }
   }, [form.district]);
 
-  // ✅ Validate Form Before Submission
   const validateForm = () => {
     let newErrors: Record<string, string> = {};
 
@@ -71,14 +88,11 @@ const Request = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // ✅ Handle Form Submission
   const handleSubmit = async () => {
     if (!validateForm()) {
       Alert.alert('Error', 'Please fill in all fields correctly');
       return;
     }
-
-    console.log('🚀 Submitting Request:', form);
 
     try {
       const response = await axios.post(API_URL, form);
@@ -86,8 +100,7 @@ const Request = () => {
       Alert.alert('Success', 'Pickup request submitted successfully');
       router.push('/screens/thankyou');
 
-      // ✅ Reset form & clear errors
-      setForm({ location: '', address: '', district: null, city: null });
+      setForm({ location: '', address: '', district: null, city: null, user_id: form.user_id });
       setErrors({});
     } catch (error) {
       console.error('❌ API Error:', error);
@@ -96,80 +109,76 @@ const Request = () => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <ScrollView 
-        contentContainerStyle={styles.scrollContainer} 
-        keyboardShouldPersistTaps="handled"
+    <>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
       >
-        <Text style={styles.title}>Pickup Request</Text>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContainer} 
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.title}>Pickup Request</Text>
 
-        {/* Location Input */}
-        <TextInput
-          style={[styles.input, errors.location && styles.errorInput]}
-          placeholder="Enter Location"
-          value={form.location}
-          onChangeText={(text) => setForm((prev) => ({ ...prev, location: text }))}
-        />
-        {errors.location && <Text style={styles.errorText}>{errors.location}</Text>}
-
-        {/* Address Input */}
-        <TextInput
-          style={[styles.input, errors.address && styles.errorInput]}
-          placeholder="Enter Address"
-          value={form.address}
-          onChangeText={(text) => setForm((prev) => ({ ...prev, address: text }))}
-        />
-        {errors.address && <Text style={styles.errorText}>{errors.address}</Text>}
-
-        {/* District Dropdown */}
-        <View style={{ zIndex: openDistrict ? 3000 : 1, width: '100%' }}>
-          <DropDownPicker
-            open={openDistrict}
-            value={form.district}
-            items={sriLankanDistricts}
-            setOpen={setOpenDistrict}
-            setValue={(callback) => {
-              const selectedValue = callback(form.district);
-              setForm((prev) => ({ ...prev, district: selectedValue, city: null }));
-            }}
-            placeholder="Select District"
-            style={[styles.dropdown, errors.district && styles.errorDropdown]}
-            containerStyle={{ width: '100%', marginBottom: 15 }}
+          <TextInput
+            style={[styles.input, errors.location && styles.errorInput]}
+            placeholder="Enter Location"
+            value={form.location}
+            onChangeText={(text) => setForm((prev) => ({ ...prev, location: text }))}
           />
-        </View>
-        {errors.district && <Text style={styles.errorText}>{errors.district}</Text>}
+          {errors.location && <Text style={styles.errorText}>{errors.location}</Text>}
 
-        {/* City Dropdown (Filtered by District) */}
-        <View style={{ zIndex: openCity ? 2000 : 1, width: '100%' }}>
-          <DropDownPicker
-            open={openCity}
-            value={form.city}
-            items={cityList}
-            setOpen={setOpenCity}
-            setValue={(callback) => {
-              const selectedValue = callback(form.city);
-              setForm((prev) => ({ ...prev, city: selectedValue }));
-            }}
-            placeholder="Select City"
-            disabled={!form.district}
-            style={[styles.dropdown, errors.city && styles.errorDropdown]}
-            containerStyle={{ width: '100%', marginBottom: 15 }}
+          <TextInput
+            style={[styles.input, errors.address && styles.errorInput]}
+            placeholder="Enter Address"
+            value={form.address}
+            onChangeText={(text) => setForm((prev) => ({ ...prev, address: text }))}
           />
-        </View>
-        {errors.city && <Text style={styles.errorText}>{errors.city}</Text>}
+          {errors.address && <Text style={styles.errorText}>{errors.address}</Text>}
 
-        {/* Submit Button */}
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Confirm</Text>
-        </TouchableOpacity>
+          <View style={{ zIndex: openDistrict ? 3000 : 1, width: '100%' }}>
+            <DropDownPicker
+              open={openDistrict}
+              value={form.district}
+              items={sriLankanDistricts}
+              setOpen={setOpenDistrict}
+              setValue={(callback) => {
+                const selectedValue = callback(form.district);
+                setForm((prev) => ({ ...prev, district: selectedValue, city: null }));
+              }}
+              placeholder="Select District"
+              style={[styles.dropdown, errors.district && styles.errorDropdown]}
+              containerStyle={{ width: '100%', marginBottom: 15 }}
+            />
+          </View>
+          {errors.district && <Text style={styles.errorText}>{errors.district}</Text>}
 
-        <BottomTabs />
-        
-      </ScrollView>
-    </KeyboardAvoidingView>
+          <View style={{ zIndex: openCity ? 2000 : 1, width: '100%' }}>
+            <DropDownPicker
+              open={openCity}
+              value={form.city}
+              items={cityList}
+              setOpen={setOpenCity}
+              setValue={(callback) => {
+                const selectedValue = callback(form.city);
+                setForm((prev) => ({ ...prev, city: selectedValue }));
+              }}
+              placeholder="Select City"
+              disabled={!form.district}
+              style={[styles.dropdown, errors.city && styles.errorDropdown]}
+              containerStyle={{ width: '100%', marginBottom: 15 }}
+            />
+          </View>
+          {errors.city && <Text style={styles.errorText}>{errors.city}</Text>}
+
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Confirm</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      <BottomTabs />
+    </>
   );
 };
 
@@ -181,8 +190,6 @@ const styles = StyleSheet.create({
   dropdown: { backgroundColor: '#fafafa' },
   button: { backgroundColor: 'green', paddingVertical: 12, paddingHorizontal: 30, borderRadius: 8, marginTop: 10 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-
-  // ✅ Validation Error Styling
   errorInput: { borderColor: 'red' },
   errorDropdown: { borderColor: 'red' },
   errorText: { color: 'red', fontSize: 12, marginBottom: 10, alignSelf: 'flex-start' },
