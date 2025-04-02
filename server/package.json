@@ -19,6 +19,7 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.10.0",
+    "pdfkit": "^0.16.0",
     "sqlite3": "^5.1.7"
   }
 }
