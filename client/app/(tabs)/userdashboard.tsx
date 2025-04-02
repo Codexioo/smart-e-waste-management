@@ -5,6 +5,7 @@ import {
   TextInput,
   FlatList,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import { FontAwesome, Feather } from "@expo/vector-icons";
 import styles from "../../styles/dashboard.styles";
@@ -12,9 +13,62 @@ import { useRouter } from "expo-router";
 import useProtectedRoute from "@/hooks/useProtectedRoute";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "../../api/axiosInstance"; // ✅ using your centralized axios instance
+import * as FileSystem from 'expo-file-system';
+
+
+
 
 export default function UserDashboard() {
   useProtectedRoute();
+
+  const handleDownloadReport = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const url = `${axios.defaults.baseURL}/reward-summary`;
+  
+      if (Platform.OS === "web") {
+        // 🟢 Web download using browser
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        const blob = await response.blob();
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.setAttribute("download", "reward-summary.pdf");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        // 📱 Native mobile download (iOS/Android)
+        const fileUri = FileSystem.documentDirectory + "reward-summary.pdf";
+        const downloadResumable = FileSystem.createDownloadResumable(
+          url,
+          fileUri,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+  
+        const result = await downloadResumable.downloadAsync();
+        if (result?.uri) {
+          alert(`✅ Report downloaded to:\n${result.uri}`);
+        } else {
+          alert("⚠️ Failed to download the report.");
+        }
+      }
+    } catch (err) {
+      console.error("Download error:", err);
+      alert("❌ Error downloading the report.");
+    }
+  };
+  
+  
 
   const [searchTerm, setSearchTerm] = useState("");
   interface PickupHistoryItem {
@@ -56,7 +110,7 @@ export default function UserDashboard() {
         <Text style={styles.rewardGrowth}>+20% month over month</Text>
 
         <View style={{ alignItems: "flex-end" }}>
-          <TouchableOpacity style={styles.downloadButton}>
+          <TouchableOpacity style={styles.downloadButton} onPress={handleDownloadReport}>
             <Text style={styles.storeText}>+ Download reward summary report</Text>
           </TouchableOpacity>
         </View>
