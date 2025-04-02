@@ -5,36 +5,60 @@ import {
   TextInput,
   FlatList,
   TouchableOpacity,
+  StyleSheet,
   Platform,
 } from "react-native";
-import { FontAwesome, Feather } from "@expo/vector-icons";
-import styles from "../../styles/dashboard.styles";
 import { useRouter } from "expo-router";
-import useProtectedRoute from "@/hooks/useProtectedRoute";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "../../api/axiosInstance"; // ✅ using your centralized axios instance
-import * as FileSystem from 'expo-file-system';
-
-
-
+import axios from "../../api/axiosInstance";
+import useProtectedRoute from "@/hooks/useProtectedRoute";
+import { Feather } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system";
 
 export default function UserDashboard() {
   useProtectedRoute();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [pickupHistory, setPickupHistory] = useState<PickupItem[]>([]);
+  const router = useRouter();
+
+  interface PickupItem {
+    city: string;
+    district: string;
+    address: string;
+    create_date?: string;
+    status: string;
+  }
+
+  useEffect(() => {
+    const fetchPickupHistory = async () => {
+      try {
+        const userData = await AsyncStorage.getItem("user");
+        if (!userData) return;
+        const user = JSON.parse(userData);
+        const response = await axios.get(`/user-requests/${user.id}`);
+        setPickupHistory(response.data.data);
+      } catch (error) {
+        console.error("Error fetching pickup history:", error);
+      }
+    };
+
+    fetchPickupHistory();
+  }, []);
 
   const handleDownloadReport = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
       const url = `${axios.defaults.baseURL}/reward-summary`;
-  
+
       if (Platform.OS === "web") {
-        // 🟢 Web download using browser
         const response = await fetch(url, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-  
+
         const blob = await response.blob();
         const link = document.createElement("a");
         link.href = window.URL.createObjectURL(blob);
@@ -43,18 +67,13 @@ export default function UserDashboard() {
         link.click();
         document.body.removeChild(link);
       } else {
-        // 📱 Native mobile download (iOS/Android)
         const fileUri = FileSystem.documentDirectory + "reward-summary.pdf";
-        const downloadResumable = FileSystem.createDownloadResumable(
-          url,
-          fileUri,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-  
+        const downloadResumable = FileSystem.createDownloadResumable(url, fileUri, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         const result = await downloadResumable.downloadAsync();
         if (result?.uri) {
           alert(`✅ Report downloaded to:\n${result.uri}`);
@@ -67,103 +86,158 @@ export default function UserDashboard() {
       alert("❌ Error downloading the report.");
     }
   };
-  
-  
-
-  const [searchTerm, setSearchTerm] = useState("");
-  interface PickupHistoryItem {
-    city: string;
-    district: string;
-    address: string;
-  }
-
-  const [pickupHistory, setPickupHistory] = useState<PickupHistoryItem[]>([]);
-  const router = useRouter();
-
-  useEffect(() => {
-    const fetchPickupHistory = async () => {
-      try {
-        const userData = await AsyncStorage.getItem("user");
-        if (!userData) return;
-
-        const user = JSON.parse(userData);
-        const response = await axios.get(`/user-requests/${user.id}`);
-        setPickupHistory(response.data.data);
-      } catch (error) {
-        console.error("Error fetching pickup history:", error);
-      }
-    };
-
-    fetchPickupHistory();
-  }, []);
 
   const filteredHistory = pickupHistory.filter((item) =>
     item.city.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const renderItem = ({ item }: { item: PickupItem }) => (
+    <View style={styles.listCard}>
+      <View style={styles.listHeader}>
+        <Text style={styles.listDate}>{item.create_date?.split("T")[0]}</Text>
+        <Text style={[styles.status, { color: getStatusColor(item.status) }]}>
+          {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+        </Text>
+      </View>
+      <Text style={styles.listLocation}>
+        {item.city}, {item.district}
+      </Text>
+      <Text style={styles.listAddress}>{item.address}</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      {/* Reward Points Card */}
-      <View style={styles.rewardCard}>
-        <Text style={styles.cardTitle}>Rewarding Points</Text>
-        <Text style={styles.rewardAmount}>$45,678.90</Text>
-        <Text style={styles.rewardGrowth}>+20% month over month</Text>
-
-        <View style={{ alignItems: "flex-end" }}>
-          <TouchableOpacity style={styles.downloadButton} onPress={handleDownloadReport}>
-            <Text style={styles.storeText}>+ Download reward summary report</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Action Buttons */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.requestButton}
-          onPress={() => router.push("/screens/request")}
-        >
-          <Text style={styles.requestText}>+ Request E-Waste Pickup</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.storeButton}>
-          <Text style={styles.storeText}>+ In Store</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Pickup History */}
-      <Text style={styles.sectionTitle}>Pickup History</Text>
-      <View style={styles.searchBar}>
-        <FontAwesome name="search" size={20} color="gray" />
-        <TextInput
-          placeholder="Search by city"
-          style={styles.searchInput}
-          value={searchTerm}
-          onChangeText={setSearchTerm}
-        />
-      </View>
-
       <FlatList
         data={filteredHistory}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.listItem}>
-            <View style={styles.listItemContent}>
-              <Feather name="database" size={24} color="#00A52C" />
-              <View style={styles.textContainer}>
-                <Text style={styles.listTitle}>
-                  {item.city}, {item.district}
-                </Text>
-                <Text style={styles.listSubtitle}>{item.address}</Text>
-              </View>
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={renderItem}
+        ListHeaderComponent={
+          <>
+            <Text style={styles.heading}>Welcome Back 👋</Text>
+
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Reward Points</Text>
+              <Text style={styles.points}>45,678</Text>
+              <Text style={styles.growth}>+20% this month</Text>
+              <TouchableOpacity onPress={handleDownloadReport} style={styles.reportBtn}>
+                <Text style={styles.reportText}>Download Summary</Text>
+              </TouchableOpacity>
             </View>
-          </View>
-        )}
-        ListEmptyComponent={
-          <Text style={{ textAlign: "center", marginTop: 20, color: "gray" }}>
-            No pickup history found.
-          </Text>
+
+            <View style={styles.actionsContainer}>
+              <TouchableOpacity
+                style={styles.requestButton}
+                onPress={() => router.push("/screens/request")}
+              >
+                <Feather name="plus" size={18} color="#fff" />
+                <Text style={styles.actionText}>Request Pickup</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.storeButton}>
+                <Feather name="shopping-bag" size={18} color="#fff" />
+                <Text style={styles.actionText}>Store</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TextInput
+              placeholder="Search by city"
+              style={styles.searchBar}
+              value={searchTerm}
+              onChangeText={setSearchTerm}
+            />
+          </>
         }
+        ListEmptyComponent={<Text style={styles.empty}>No pickup history found.</Text>}
+        contentContainerStyle={{ paddingBottom: 20 }}
       />
     </View>
   );
 }
+
+const getStatusColor = (status: string) => {
+  switch (status.toLowerCase()) {
+    case "pending":
+      return "orange";
+    case "accepted":
+      return "blue";
+    case "completed":
+      return "green";
+    case "rejected":
+      return "red";
+    default:
+      return "gray";
+  }
+};
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#f9f9f9", padding: 20, paddingTop: 60 },
+  heading: { fontSize: 24, fontWeight: "700", marginBottom: 10, color: "#333" },
+  card: {
+    backgroundColor: "#4CAF50",
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 20,
+  },
+  cardTitle: { color: "#fff", fontSize: 16, marginBottom: 5 },
+  points: { fontSize: 32, fontWeight: "bold", color: "#fff" },
+  growth: { color: "#e0ffe0", marginTop: 5 },
+  reportBtn: { marginTop: 10, alignSelf: "flex-end" },
+  reportText: { color: "#fff", textDecorationLine: "underline" },
+  actionsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  requestButton: {
+    backgroundColor: "#4CAF50",
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginRight: 10,
+    justifyContent: "center",
+  },
+  storeButton: {
+    backgroundColor: "#4285F4",
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    justifyContent: "center",
+  },
+  actionText: { color: "#fff", marginLeft: 8, fontWeight: "600" },
+  searchBar: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    marginBottom: 20,
+  },
+  listCard: {
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  listHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 5,
+  },
+  listDate: { fontWeight: "600", color: "#333" },
+  status: { fontWeight: "bold", textTransform: "capitalize" },
+  listLocation: { color: "#444", marginBottom: 3 },
+  listAddress: { color: "#666" },
+  empty: { textAlign: "center", color: "gray", marginTop: 20 },
+});

@@ -7,17 +7,19 @@ import {
   StyleSheet,
   Alert,
   KeyboardAvoidingView,
-  ScrollView,
   Platform,
+  SafeAreaView,
+  ScrollView,
 } from 'react-native';
-
 import DropDownPicker from 'react-native-dropdown-picker';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BottomTabs from '@/components/bottombar';
-import axios from "../../api/axiosInstance";
+import BottomTabs from '@/app/components/bottombar';
+import axios from '../../api/axiosInstance';
 
-const API_URL = '/request-pickup'; // <-- Replace with your IP
+
+
+const API_URL = '/request-pickup';
 
 const sriLankanDistricts = [
   { label: 'Colombo', value: 'Colombo' },
@@ -35,19 +37,20 @@ const citiesByDistrict: Record<string, string[]> = {
   Jaffna: ['Chunnakam', 'Nallur', 'Kopay'],
 };
 
+const wasteTypes = ['Plastic', 'Glass', 'Metal', 'Paper'];
+
 const Request = () => {
   const [form, setForm] = useState({
-    location: '',
     address: '',
     district: null,
     city: null,
     user_id: null,
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [openDistrict, setOpenDistrict] = useState(false);
   const [openCity, setOpenCity] = useState(false);
   const [cityList, setCityList] = useState<{ label: string; value: string }[]>([]);
+  const [selectedWastes, setSelectedWastes] = useState<string[]>([]);
 
   useEffect(() => {
     const getUser = async () => {
@@ -58,16 +61,15 @@ const Request = () => {
           setForm((prev) => ({ ...prev, user_id: user.id }));
         }
       } catch (err) {
-        console.error("Failed to load user from storage:", err);
+        console.error('Failed to load user from storage:', err);
       }
     };
-
     getUser();
   }, []);
 
   useEffect(() => {
-    if (form.district && Object.prototype.hasOwnProperty.call(citiesByDistrict, form.district)) {
-      const cities = citiesByDistrict[form.district] || [];
+    if (form.district && citiesByDistrict[form.district]) {
+      const cities = citiesByDistrict[form.district];
       setCityList(cities.map((city) => ({ label: city, value: city })));
       setForm((prev) => ({ ...prev, city: null }));
     } else {
@@ -76,123 +78,190 @@ const Request = () => {
     }
   }, [form.district]);
 
-  const validateForm = () => {
-    let newErrors: Record<string, string> = {};
-
-    if (!form.location.trim()) newErrors.location = 'Location is required';
-    if (!form.address.trim()) newErrors.address = 'Address is required';
-    if (!form.district) newErrors.district = 'Please select a district';
-    if (!form.city) newErrors.city = 'Please select a city';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const toggleWasteType = (type: string) => {
+    setSelectedWastes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    );
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) {
-      Alert.alert('Error', 'Please fill in all fields correctly');
+    const newErrors: Record<string, string> = {};
+    if (!form.address?.trim()) newErrors.address = 'Address is required';
+    if (!form.district) newErrors.district = 'Please select a district';
+    if (!form.city) newErrors.city = 'Please select a city';
+    if (selectedWastes.length === 0) newErrors.waste_types = 'Select at least one waste type';
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      Alert.alert('Validation Error', 'Please fill in all required fields');
       return;
     }
 
+    const requestData = {
+      ...form,
+      waste_types: selectedWastes,
+      create_date: new Date().toISOString(),
+    };
+
     try {
-      const response = await axios.post(API_URL, form);
-      console.log('✅ Response:', response.data);
+      await axios.post(API_URL, requestData);
       Alert.alert('Success', 'Pickup request submitted successfully');
       router.push('/screens/thankyou');
 
-      setForm({ location: '', address: '', district: null, city: null, user_id: form.user_id });
+      setForm({
+        address: '',
+        district: null,
+        city: null,
+        user_id: form.user_id,
+      });
+      setSelectedWastes([]);
       setErrors({});
     } catch (error) {
       console.error('❌ API Error:', error);
-      Alert.alert('Error', 'Failed to submit request');
+      Alert.alert('Error', (error as any)?.response?.data?.error || 'Failed to submit request');
     }
   };
 
   return (
-    <>
-      <KeyboardAvoidingView 
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
+        style={{ flex: 1 }}
       >
-        <ScrollView 
-          contentContainerStyle={styles.scrollContainer} 
-          keyboardShouldPersistTaps="handled"
-        >
+        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
           <Text style={styles.title}>Pickup Request</Text>
 
           <TextInput
-            style={[styles.input, errors.location && styles.errorInput]}
-            placeholder="Enter Location"
-            value={form.location}
-            onChangeText={(text) => setForm((prev) => ({ ...prev, location: text }))}
-          />
-          {errors.location && <Text style={styles.errorText}>{errors.location}</Text>}
-
-          <TextInput
             style={[styles.input, errors.address && styles.errorInput]}
-            placeholder="Enter Address"
+            placeholder="Address"
             value={form.address}
             onChangeText={(text) => setForm((prev) => ({ ...prev, address: text }))}
           />
           {errors.address && <Text style={styles.errorText}>{errors.address}</Text>}
 
-          <View style={{ zIndex: openDistrict ? 3000 : 1, width: '100%' }}>
+          <View style={{ zIndex: 2000 }}>
             <DropDownPicker
               open={openDistrict}
               value={form.district}
               items={sriLankanDistricts}
               setOpen={setOpenDistrict}
-              setValue={(callback) => {
-                const selectedValue = callback(form.district);
-                setForm((prev) => ({ ...prev, district: selectedValue, city: null }));
+              setValue={(cb) => {
+                const value = cb(form.district);
+                setForm((prev) => ({ ...prev, district: value }));
               }}
               placeholder="Select District"
               style={[styles.dropdown, errors.district && styles.errorDropdown]}
-              containerStyle={{ width: '100%', marginBottom: 15 }}
+              containerStyle={{ marginBottom: 10 }}
             />
           </View>
           {errors.district && <Text style={styles.errorText}>{errors.district}</Text>}
 
-          <View style={{ zIndex: openCity ? 2000 : 1, width: '100%' }}>
+          <View style={{ zIndex: 1000 }}>
             <DropDownPicker
               open={openCity}
               value={form.city}
               items={cityList}
               setOpen={setOpenCity}
-              setValue={(callback) => {
-                const selectedValue = callback(form.city);
-                setForm((prev) => ({ ...prev, city: selectedValue }));
+              setValue={(cb) => {
+                const value = cb(form.city);
+                setForm((prev) => ({ ...prev, city: value }));
               }}
               placeholder="Select City"
               disabled={!form.district}
               style={[styles.dropdown, errors.city && styles.errorDropdown]}
-              containerStyle={{ width: '100%', marginBottom: 15 }}
+              containerStyle={{ marginBottom: 10 }}
             />
           </View>
           {errors.city && <Text style={styles.errorText}>{errors.city}</Text>}
 
+          <Text style={styles.subTitle}>Select Waste Types</Text>
+          <View style={styles.wasteTagWrapper}>
+            {wasteTypes.map((type) => (
+              <TouchableOpacity
+                key={type}
+                style={[styles.wasteTag, selectedWastes.includes(type) && styles.selectedWasteTag]}
+                onPress={() => toggleWasteType(type)}
+              >
+                <Text style={styles.wasteTagText}>{type.toUpperCase()}</Text>
+                {selectedWastes.includes(type) && <Text style={styles.wasteTagClose}> ✕</Text>}
+              </TouchableOpacity>
+            ))}
+          </View>
+          {errors.waste_types && <Text style={styles.errorText}>{errors.waste_types}</Text>}
+
           <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-            <Text style={styles.buttonText}>Confirm</Text>
+            <Text style={styles.buttonText}>Confirm Request</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
-
       <BottomTabs />
-    </>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  scrollContainer: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
-  input: { width: '100%', height: 50, borderWidth: 1, borderColor: '#ccc', borderRadius: 8, paddingHorizontal: 10, marginBottom: 5 },
-  dropdown: { backgroundColor: '#fafafa' },
-  button: { backgroundColor: 'green', paddingVertical: 12, paddingHorizontal: 30, borderRadius: 8, marginTop: 10 },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  scrollContainer: { padding: 20, paddingBottom: 40 },
+  title: { fontSize: 24, fontWeight: '700', marginBottom: 15, color: '#111' },
+  subTitle: { fontSize: 18, fontWeight: '600', marginBottom: 10, color: '#222' },
+  input: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    marginBottom: 10,
+  },
+  dropdown: {
+    borderRadius: 10,
+    borderColor: '#ccc',
+  },
   errorInput: { borderColor: 'red' },
   errorDropdown: { borderColor: 'red' },
-  errorText: { color: 'red', fontSize: 12, marginBottom: 10, alignSelf: 'flex-start' },
+  errorText: { color: 'red', fontSize: 12, marginBottom: 10 },
+  wasteTagWrapper: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  wasteTag: {
+    backgroundColor: '#ccc',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginRight: 8,
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  selectedWasteTag: {
+    backgroundColor: '#4CAF50',
+  },
+  wasteTagText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginRight: 6,
+  },
+  wasteTagClose: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  button: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
 
 export default Request;
