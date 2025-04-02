@@ -5,6 +5,8 @@ const pickupRoutes = require('./routes/requestRoutes');
 const signupRoutes = require('./routes/signupRoutes');
 const loginRoutes = require('./routes/loginRoutes');
 const profileRoutes = require('./routes/profileRoutes');
+const rewardReportRoutes = require('./routes/rewardReportRoutes');
+
 
 //maleen's routes
 const authRoutes = require('./routes/authRoutes');
@@ -24,6 +26,7 @@ app.use('/', pickupRoutes);
 app.use('/', signupRoutes);
 app.use('/', loginRoutes);
 app.use('/', profileRoutes);
+app.use('/', rewardReportRoutes);
 
 //maleen's routes
 app.use('/api', authRoutes);
