@@ -1,16 +1,19 @@
 const db = require('../database');
 
 const insertRequest = (data, callback) => {
-  const { location, address, district, city, user_id } = data;
+  const { address, district, city, user_id, waste_types } = data;
+  const create_date = new Date().toISOString();
+  const status = 'pending'; // Default status on submission
+  const wasteStr = waste_types.join(','); // Convert array to comma-separated string
+
   const sql = `
-    INSERT INTO pickup_requests (location, address, district, city, user_id)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO pickup_requests (address, district, city, waste_types, create_date, status, user_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
-  db.run(sql, [location, address, district, city, user_id], function (err) {
-    if (err) {
-      return callback(err);
-    }
-    callback(null, { id: this.lastID, ...data });
+
+  db.run(sql, [address, district, city, wasteStr, create_date, status, user_id], function (err) {
+    if (err) return callback(err);
+    callback(null, { id: this.lastID, ...data, status, create_date });
   });
 };
 
@@ -22,7 +25,6 @@ const getRequestsByUserId = (userId, callback) => {
   });
 };
 
-// ✅ Export both functions together
 module.exports = {
   insertRequest,
   getRequestsByUserId,
