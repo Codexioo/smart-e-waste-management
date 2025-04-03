@@ -1,6 +1,6 @@
+// requestController.js
 const { insertRequest, getRequestsByUserId } = require('../models/requestModel');
 
-// User submits pickup request (status will be 'pending' by default)
 const handlePickupRequest = (req, res) => {
   const { address, district, city, user_id, waste_types } = req.body;
 

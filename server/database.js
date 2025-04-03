@@ -47,12 +47,13 @@ db.serialize(() => {
     db.run(`
       CREATE TABLE IF NOT EXISTS pickup_requests (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        request_code TEXT UNIQUE,
         address TEXT NOT NULL,
         district TEXT NOT NULL,
         city TEXT NOT NULL,
         waste_types TEXT NOT NULL,
         create_date TEXT NOT NULL,
-        status TEXT CHECK(status IN ('pending', 'Accepted', 'Rejected', 'completed')) NOT NULL,
+        status TEXT CHECK(status IN ('pending', 'accepted', 'rejected', 'Assigned', 'completed')) NOT NULL DEFAULT 'pending',
         user_id INTEGER NOT NULL,
         FOREIGN KEY(user_id) REFERENCES users(id)
       )
