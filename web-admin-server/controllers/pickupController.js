@@ -1,14 +1,28 @@
-//sample code
+const db = require('../database');
 
 const getAllPickupRequests = (req, res) => {
-    const db = req.db;
-  
-    db.all('SELECT * FROM pickup_requests ORDER BY create_date DESC', [], (err, rows) => {
-      if (err) {
-        return res.status(500).json({ error: 'Failed to fetch pickup requests' });
-      }
-      res.json({ success: true, data: rows });
-    });
-  };
-  
-  module.exports = { getAllPickupRequests };
+  const query = `
+    SELECT 
+      pr.id,
+      pr.request_code,
+      pr.create_date,
+      pr.district,
+      pr.city,
+      pr.address,
+      pr.status,
+      u.username AS user_name
+    FROM pickup_requests pr
+    JOIN users u ON pr.user_id = u.id
+    ORDER BY pr.create_date DESC
+  `;
+
+  db.all(query, [], (err, rows) => {
+    if (err) {
+      console.error('❌ DB error:', err);
+      return res.status(500).json({ error: 'Failed to fetch pickup requests' });
+    }
+    res.json(rows);
+  });
+};
+
+module.exports = { getAllPickupRequests };
