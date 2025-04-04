@@ -6,7 +6,7 @@ const Sidebar: React.FC = () => {
   const location = useLocation();
 
   const navItems = [
-    { label: 'Dashboard', path: '/' },
+    { label: 'Dashboard', path: '/dashboard' },
     { label: 'Users', path: '/users' },
     { label: 'Pickup Requests', path: '/requests' },
     { label: 'Rewards', path: '/rewards' },
