@@ -133,7 +133,8 @@ export default function UserDashboard() {
                 <Feather name="plus" size={18} color="#fff" />
                 <Text style={styles.actionText}>Request Pickup</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.storeButton}>
+              <TouchableOpacity style={styles.storeButton}
+                onPress={() => router.push("/screens/shop")}>
                 <Feather name="shopping-bag" size={18} color="#fff" />
                 <Text style={styles.actionText}>Store</Text>
               </TouchableOpacity>
