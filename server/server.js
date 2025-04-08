@@ -16,7 +16,7 @@ const productRoutes = require('./routes/productRoutes');
 
 
 const app = express();
-const PORT = 9090;
+const PORT = 3001;
 
 app.use(cors());
 app.use(bodyParser.json());
