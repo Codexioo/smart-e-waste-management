@@ -3,28 +3,48 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#f9f9f9",
   },
   container: {
     flex: 1,
-    padding: 16,
+    padding: 20,
+    paddingTop: 60,
   },
   title: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "green",
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 10,
+  },
+  actionsContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
     marginBottom: 20,
   },
+  storeButton: {
+    backgroundColor: "#4285F4",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    justifyContent: "center",
+  },
+  actionText: {
+    color: "#fff",
+    marginLeft: 8,
+    fontWeight: "600",
+  },
   productCard: {
-    backgroundColor: "#f0fff0",
-    padding: 16,
-    borderRadius: 10,
-    marginBottom: 20,
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 15,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    shadowRadius: 6,
+    elevation: 3,
   },
   productName: {
     fontWeight: "bold",
@@ -37,11 +57,11 @@ const styles = StyleSheet.create({
   },
   productPrice: {
     fontWeight: "bold",
-    color: "green",
+    color: "#4CAF50",
     marginBottom: 4,
   },
   productStock: {
-    color: "red",
+    color: "#f44336",
     marginBottom: 10,
   },
   quantityRow: {
@@ -51,9 +71,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   quantityButton: {
-    backgroundColor: "green",
+    backgroundColor: "#4CAF50",
     padding: 10,
-    borderRadius: 6,
+    borderRadius: 10,
     marginHorizontal: 8,
   },
   qtyText: {
@@ -61,19 +81,22 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     minWidth: 30,
     textAlign: "center",
+    color: "#333",
   },
   addButton: {
-    backgroundColor: "green",
-    padding: 12,
-    borderRadius: 6,
+    backgroundColor: "#4CAF50",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
     alignItems: "center",
+    justifyContent: "center",
   },
   disabledButton: {
-    backgroundColor: "white",
+    backgroundColor: "#ccc",
   },
   addButtonText: {
-    color: "black",
-    fontWeight: "bold",
+    color: "#fff",
+    fontWeight: "600",
   },
 });
 
