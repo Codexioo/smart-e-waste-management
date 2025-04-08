@@ -5,13 +5,16 @@ import {
   FlatList,
   Alert,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "../../styles/shopStyles";
 import ProductCard from "../../components/ProductCard";
 import { getProducts } from "../../services/productsService";
+import { Feather } from "@expo/vector-icons";
 
 type Product = {
   product_id: number;
@@ -32,6 +35,7 @@ export default function ShopScreen() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantities, setQuantities] = useState<{ [key: number]: number }>({});
+  const router = useRouter();
 
   const fetchProducts = async () => {
     try {
@@ -132,6 +136,17 @@ export default function ShopScreen() {
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.container}>
         <Text style={styles.title}>Recycled Item Shop</Text>
+
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity
+            style={styles.storeButton}
+            onPress={() => router.push("/screens/cart")}
+          >
+            <Feather name="shopping-cart" size={18} color="#fff" />
+            <Text style={styles.actionText}>Cart</Text>
+          </TouchableOpacity>
+        </View>
+
         <FlatList
           data={products}
           keyExtractor={(item) => item.product_id.toString()}
