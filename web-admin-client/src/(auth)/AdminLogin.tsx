@@ -3,6 +3,7 @@ import axios from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import "../styles/AdminLogin.css";
 
+
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,6 +35,7 @@ export default function AdminLogin() {
     try {
       const response = await axios.post("/admin/login", { email, password });
       localStorage.setItem("adminToken", response.data.token);
+      localStorage.setItem("adminUser", JSON.stringify(response.data.user));
       navigate("/dashboard");
     } catch (err) {
       setError("Invalid credentials");
