@@ -25,7 +25,7 @@ router.get('/profile', authenticate, (req, res) => {
   const userId = req.user.id;
 
   db.get(
-    `SELECT id, username, email, telephone, address, role FROM users WHERE id = ?`,
+    `SELECT id, username, email, telephone, address, role, profile_image FROM users WHERE id = ?`,
     [userId],
     (err, user) => {
       if (err || !user) {
@@ -39,7 +39,7 @@ router.get('/profile', authenticate, (req, res) => {
 // 🔄 Update Profile Info
 router.put('/profile', authenticate, (req, res) => {
   const userId = req.user.id;
-  const { username, telephone, address } = req.body;
+  const { username, telephone, address, profile_image } = req.body;
 
   if (!username || !telephone || !address) {
     return res.status(400).json({ error: "All fields are required" });
@@ -47,11 +47,11 @@ router.put('/profile', authenticate, (req, res) => {
 
   const sql = `
     UPDATE users
-    SET username = ?, telephone = ?, address = ?
+    SET username = ?, telephone = ?, address = ?, profile_image = ?
     WHERE id = ?
   `;
 
-  db.run(sql, [username, telephone, address, userId], function (err) {
+  db.run(sql, [username, telephone, address, profile_image || null, userId], function (err) {
     if (err) {
       console.error(err);
       return res.status(500).json({ error: "Database error" });
