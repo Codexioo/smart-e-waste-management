@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   TextInput,
   Alert,
+  Image, 
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import styles from "../../styles/profile.styles";
@@ -14,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import axios from "../../api/axiosInstance";
 import useProtectedRoute from "@/hooks/useProtectedRoute";
+import * as ImagePicker from 'expo-image-picker';
 
 export default function Profile() {
   useProtectedRoute();
@@ -25,9 +27,27 @@ export default function Profile() {
   const [isLoading, setIsLoading] = useState(false);
   const [isProfileLoading, setIsProfileLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [profileImage, setProfileImage] = useState("");
 
   const router = useRouter();
 
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.3,
+      base64: true,
+    });
+  
+    if (!result.canceled) {
+      const imageBase64 = result.assets[0].base64;
+      const base64Image = `data:image/jpeg;base64,${imageBase64}`;
+      setProfileImage(base64Image); // for preview + sending to backend
+    }
+  };
+  
+  
+  
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -47,6 +67,7 @@ export default function Profile() {
         setEmail(user.email);
         setTelephone(user.telephone);
         setAddress(user.address);
+        setProfileImage(user.profile_image || ""); 
       } catch (error) {
         console.error("Profile load error:", error);
         alert("Failed to load profile.");
@@ -73,6 +94,7 @@ export default function Profile() {
           username: name,
           telephone,
           address,
+          profile_image: profileImage,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -143,6 +165,25 @@ export default function Profile() {
     <View style={styles.container}>
       <View style={styles.card}>
         <Text style={styles.title}>Profile Informations</Text>
+
+        <View style={styles.profileContainer}>
+  {profileImage ? (
+    <>
+      <Image source={{ uri: profileImage }} style={styles.profileImage} />
+      {isEditing && (
+        <TouchableOpacity onPress={() => setProfileImage("")}>
+          <Text style={styles.removeImageText}>Remove Image</Text>
+        </TouchableOpacity>
+      )}
+    </>
+  ) : (
+    isEditing && (
+      <TouchableOpacity onPress={pickImage}>
+        <Text style={styles.addImageText}>Add Profile Image</Text>
+      </TouchableOpacity>
+    )
+  )}
+</View>
 
         <Text style={styles.label}>Username</Text>
         <View style={styles.inputContainer}>

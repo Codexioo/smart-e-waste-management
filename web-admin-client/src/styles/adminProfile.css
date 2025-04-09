@@ -1,0 +1,70 @@
+.admin-profile-wrapper {
+    background: #f4faf5;
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 600px;
+    margin: 40px auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  
+  .admin-profile-title {
+    font-size: 28px;
+    color: #00a52c;
+    font-weight: bold;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  .admin-label {
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 6px;
+    display: block;
+    color: #1a3d1a;
+  }
+  
+  input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #c8e6c9;
+    background: #f4faf5;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  
+  .admin-profile-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+    justify-content: space-between;
+  }
+  
+  button {
+    padding: 12px 20px;
+    border-radius: 8px;
+    background: #00a52c;
+    color: white;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+  }
+  
+  button.danger {
+    background: red;
+  }
+  
+  button:hover {
+    opacity: 0.9;
+  }
+
+  .admin-avatar-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .image-section {
+    margin: 10px 0;
+  }
+  
+  
