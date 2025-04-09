@@ -9,11 +9,11 @@ import {
   Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "../../api/axiosInstance";
 import useProtectedRoute from "@/hooks/useProtectedRoute";
 import { Feather } from "@expo/vector-icons";
 import * as FileSystem from "expo-file-system";
+import { getUser, getToken } from "@/utils/storage";
 
 export default function UserDashboard() {
   useProtectedRoute();
@@ -33,9 +33,8 @@ export default function UserDashboard() {
   useEffect(() => {
     const fetchPickupHistory = async () => {
       try {
-        const userData = await AsyncStorage.getItem("user");
-        if (!userData) return;
-        const user = JSON.parse(userData);
+        const user = await getUser();
+        if (!user) return;
         const response = await axios.get(`/user-requests/${user.id}`);
         setPickupHistory(response.data.data);
       } catch (error) {
@@ -48,17 +47,14 @@ export default function UserDashboard() {
 
   const handleDownloadReport = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = await getToken();
       const url = `${axios.defaults.baseURL}/reward-summary`;
 
       if (Platform.OS === "web") {
         const response = await fetch(url, {
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-
         const blob = await response.blob();
         const link = document.createElement("a");
         link.href = window.URL.createObjectURL(blob);
@@ -69,17 +65,11 @@ export default function UserDashboard() {
       } else {
         const fileUri = FileSystem.documentDirectory + "reward-summary.pdf";
         const downloadResumable = FileSystem.createDownloadResumable(url, fileUri, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         const result = await downloadResumable.downloadAsync();
-        if (result?.uri) {
-          alert(`✅ Report downloaded to:\n${result.uri}`);
-        } else {
-          alert("⚠️ Failed to download the report.");
-        }
+        alert(result?.uri ? `✅ Report downloaded to:\n${result.uri}` : "⚠️ Failed to download report.");
       }
     } catch (err) {
       console.error("Download error:", err);
@@ -99,9 +89,7 @@ export default function UserDashboard() {
           {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
         </Text>
       </View>
-      <Text style={styles.listLocation}>
-        {item.city}, {item.district}
-      </Text>
+      <Text style={styles.listLocation}>{item.city}, {item.district}</Text>
       <Text style={styles.listAddress}>{item.address}</Text>
     </View>
   );
@@ -115,7 +103,6 @@ export default function UserDashboard() {
         ListHeaderComponent={
           <>
             <Text style={styles.heading}>Welcome Back 👋</Text>
-
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Reward Points</Text>
               <Text style={styles.points}>45,678</Text>
@@ -133,8 +120,10 @@ export default function UserDashboard() {
                 <Feather name="plus" size={18} color="#fff" />
                 <Text style={styles.actionText}>Request Pickup</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.storeButton}
-                onPress={() => router.push("/screens/shop")}>
+              <TouchableOpacity
+                style={styles.storeButton}
+                onPress={() => router.push("/screens/shop")}
+              >
                 <Feather name="shopping-bag" size={18} color="#fff" />
                 <Text style={styles.actionText}>Store</Text>
               </TouchableOpacity>
