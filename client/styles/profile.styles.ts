@@ -162,13 +162,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: COLORS.lightGray, // Placeholder background
-  },
-
   editIcon: {
     position: "absolute",
     bottom: 0,
@@ -182,6 +175,22 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#fff",
   },
+
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 10,
+  },
+  addImageText: {
+    color: COLORS.primary,
+    textAlign: "center",
+  },
+  removeImageText: {
+    color: "red",
+    textAlign: "center",
+  }
+  
   
 });
 

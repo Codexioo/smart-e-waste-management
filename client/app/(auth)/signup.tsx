@@ -11,7 +11,7 @@ import styles from "../../styles/signup.styles";
 import React, { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import COLORS from "@/constants/colors";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import DropDownPicker from "react-native-dropdown-picker";
 import axios from "../../api/axiosInstance";
 
@@ -324,6 +324,17 @@ export default function Signup() {
                 <Text style={styles.buttonText}>Sign Up</Text>
               )}
             </TouchableOpacity>
+
+             {/* Footer */}
+             <View style={styles.footer}>
+              <Text style={styles.footerText}>Already have an account?</Text>
+              <Link href="/(auth)" asChild>
+                <TouchableOpacity>
+                  <Text style={styles.link}>Log In</Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
+
           </View>
         </View>
       </View>

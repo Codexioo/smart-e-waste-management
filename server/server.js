@@ -16,10 +16,14 @@ const productRoutes = require('./routes/productRoutes');
 
 
 const app = express();
-const PORT = 9090;
+const PORT = 3001;
 
 app.use(cors());
-app.use(bodyParser.json());
+//app.use(bodyParser.json());
+
+//Allow large JSON payloads (e.g., base64 images)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Routes
 app.use('/', pickupRoutes);
@@ -29,10 +33,10 @@ app.use('/', profileRoutes);
 app.use('/', rewardReportRoutes);
 
 //maleen's routes
-app.use('/', authRoutes);
-app.use('/', rewardRoutes);
-app.use('/', orderRoutes);
-app.use('/', productRoutes);
+app.use('/api', authRoutes);
+app.use('/api', rewardRoutes);
+app.use('/api', orderRoutes);
+app.use('/api', productRoutes);
 
 
 // Start Server

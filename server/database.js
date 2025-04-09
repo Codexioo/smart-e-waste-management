@@ -36,7 +36,10 @@ db.serialize(() => {
         role TEXT CHECK(role IN ('customer', 'collector', 'admin')) NOT NULL,
         password TEXT NOT NULL,
         otp_verified BOOLEAN DEFAULT 0,
-        total_reward_points INTEGER DEFAULT 0
+        total_reward_points INTEGER DEFAULT 0,
+        create_date TEXT NOT NULL,
+        create_time TEXT NOT NULL,
+        profile_image TEXT
       )
     `, (err) => {
       if (err) console.error('❌ Error creating users table:', err);
