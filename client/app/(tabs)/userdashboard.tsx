@@ -122,7 +122,7 @@ export default function UserDashboard() {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.storeButton}
-                onPress={() => router.push("/screens/shop")}
+                onPress={() => router.push("../screens/shop")}
               >
                 <Feather name="shopping-bag" size={18} color="#fff" />
                 <Text style={styles.actionText}>Store</Text>
