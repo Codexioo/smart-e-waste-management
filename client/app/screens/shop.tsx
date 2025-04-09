@@ -140,7 +140,7 @@ export default function ShopScreen() {
         <View style={styles.actionsContainer}>
           <TouchableOpacity
             style={styles.storeButton}
-            onPress={() => router.push("/screens/cart")}
+            onPress={() => router.push("../screens/cart")}
           >
             <Feather name="shopping-cart" size={18} color="#fff" />
             <Text style={styles.actionText}>Cart</Text>
