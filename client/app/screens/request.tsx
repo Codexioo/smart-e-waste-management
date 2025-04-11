@@ -14,8 +14,7 @@ import {
 import DropDownPicker from 'react-native-dropdown-picker';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BottomTabs from '@/components/bottombar';
-
+import BottomBar from "../../components/bottombar";
 import axios from '../../api/axiosInstance';
 
 
@@ -195,6 +194,7 @@ const Request = () => {
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
+       <BottomBar />
     </SafeAreaView>
   );
 };
