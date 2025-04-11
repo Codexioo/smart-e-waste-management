@@ -118,8 +118,3 @@ npm start
 
 This project is part of a university coursework under the ITPM 3rd Year 2nd Semester curriculum.
 
----
-
-## 📄 License
-
-MIT License (or your preferred license here)
