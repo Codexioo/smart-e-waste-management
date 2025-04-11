@@ -1,8 +1,9 @@
 const { findUserByEmail } = require('../models/loginModel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+require('dotenv').config(); // 👈 Add this line
 
-const SECRET_KEY = 'your_secret_key'; // Match this with your signup controller
+const SECRET_KEY = process.env.JWT_SECRET;
 
 const handleLogin = (req, res) => {
   const { email, password } = req.body;

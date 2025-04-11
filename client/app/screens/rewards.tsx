@@ -5,22 +5,15 @@ import {
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
-  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  TabView,
-  SceneMap,
-  TabBar,
-  NavigationState,
-  SceneRendererProps,
-} from "react-native-tab-view";
-import * as Print from "expo-print";
-import * as Sharing from "expo-sharing";
 import { useFocusEffect } from "@react-navigation/native";
 import styles from "../../styles/rewardsStyles";
 import RewardHistoryItem from "../../components/RewardHistoryItem";
 import { getRewards } from "../../services/rewardsService";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
+import BottomBar from "../../components/bottombar";
 
 type Reward = {
   transaction_type: "credit" | "redeem";
@@ -29,23 +22,16 @@ type Reward = {
 };
 
 export default function RewardScreen() {
-  const layout = useWindowDimensions();
-
   const [rewards, setRewards] = useState<{
     totalPoints: number;
     history: Reward[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [index, setIndex] = useState(0);
-  const [routes] = useState([
-    { key: "credit", title: "Credited" },
-    { key: "redeem", title: "Redeemed" },
-  ]);
+  const [selectedTab, setSelectedTab] = useState<"credit" | "redeem">("credit");
 
   const fetchRewards = async () => {
     try {
-      const email = "chamikara38@gmail.com";
-      const data = await getRewards(email);
+      const data = await getRewards();
       if (data.success) {
         setRewards(data);
       } else {
@@ -82,7 +68,7 @@ export default function RewardScreen() {
       alert("No reward history to export");
       return;
     }
-
+  
     const creditRows = rewards.history
       .filter((item) => item.transaction_type === "credit")
       .map(
@@ -90,7 +76,7 @@ export default function RewardScreen() {
           `<tr><td>${formatDate(item.transaction_date)}</td><td>+${item.points}</td></tr>`
       )
       .join("");
-
+  
     const redeemRows = rewards.history
       .filter((item) => item.transaction_type === "redeem")
       .map(
@@ -98,28 +84,28 @@ export default function RewardScreen() {
           `<tr><td>${formatDate(item.transaction_date)}</td><td>-${item.points}</td></tr>`
       )
       .join("");
-
+  
     const html = `
       <html>
         <body style="font-family: Arial; padding: 16px;">
           <h2>Smart E-Waste – Reward History</h2>
-          <p><strong>Total Points:</strong> ${rewards.totalPoints}</p>
-
+          <p><strong>Total Available Points:</strong> ${rewards.totalPoints}</p>
+  
           <h3>Credited</h3>
-          <table border="1" cellpadding="8" cellspacing="0" style="width:100%; margin-bottom: 20px;">
+          <table border="1" cellpadding="8" cellspacing="0" style="width:100%; margin-bottom: 24px;">
             <tr><th>Date</th><th>Points</th></tr>
-            ${creditRows}
+            ${creditRows || `<tr><td colspan="2">No credited rewards</td></tr>`}
           </table>
-
+  
           <h3>Redeemed</h3>
           <table border="1" cellpadding="8" cellspacing="0" style="width:100%;">
             <tr><th>Date</th><th>Points</th></tr>
-            ${redeemRows}
+            ${redeemRows || `<tr><td colspan="2">No redeemed rewards</td></tr>`}
           </table>
         </body>
       </html>
     `;
-
+  
     try {
       const result = await Print.printToFileAsync({ html });
       if (!(await Sharing.isAvailableAsync())) {
@@ -130,50 +116,18 @@ export default function RewardScreen() {
       alert("Failed to export PDF");
     }
   };
+  
 
-  const CreditHistory = () => (
-    <FlatList
-      data={rewards?.history.filter((item) => item.transaction_type === "credit")}
-      keyExtractor={(_, i) => i.toString()}
-      renderItem={({ item }) => (
-        <RewardHistoryItem
-          date={formatDate(item.transaction_date)}
-          points={item.points}
-          type="credit"
-        />
-      )}
+  const renderItem = ({ item }: { item: Reward }) => (
+    <RewardHistoryItem
+      date={formatDate(item.transaction_date)}
+      points={item.points}
+      type={item.transaction_type}
     />
   );
 
-  const RedeemHistory = () => (
-    <FlatList
-      data={rewards?.history.filter((item) => item.transaction_type === "redeem")}
-      keyExtractor={(_, i) => i.toString()}
-      renderItem={({ item }) => (
-        <RewardHistoryItem
-          date={formatDate(item.transaction_date)}
-          points={item.points}
-          type="redeem"
-        />
-      )}
-    />
-  );
-
-  const renderScene = SceneMap({
-    credit: CreditHistory,
-    redeem: RedeemHistory,
-  });
-
-  const renderTabBar = (props: SceneRendererProps & {
-    navigationState: NavigationState<{ key: string; title: string }>;
-  }) => (
-    <TabBar
-      {...props}
-      indicatorStyle={{ backgroundColor: "green" }}
-      style={{ backgroundColor: "black", marginBottom: 10 }}
-      tabStyle={{ paddingVertical: 6 }}
-    />
-  );
+  const filteredData =
+    rewards?.history.filter((item) => item.transaction_type === selectedTab) || [];
 
   if (loading) {
     return (
@@ -187,20 +141,61 @@ export default function RewardScreen() {
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.container}>
         <Text style={styles.title}>Reward Dashboard</Text>
-        <Text style={styles.totalPoints}>Total Points: {rewards?.totalPoints}</Text>
+        <Text style={styles.totalPoints}>Total Available Points: {rewards?.totalPoints}</Text>
+
+        <View style={styles.tabBarAlt}>
+          <TouchableOpacity
+            style={[
+              styles.tabButton,
+              selectedTab === "credit" && styles.activeTab,
+            ]}
+            onPress={() => setSelectedTab("credit")}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                selectedTab === "credit" && styles.activeTabText,
+              ]}
+            >
+              Credited
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.tabButton,
+              selectedTab === "redeem" && styles.activeTab,
+            ]}
+            onPress={() => setSelectedTab("redeem")}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                selectedTab === "redeem" && styles.activeTabText,
+              ]}
+            >
+              Redeemed
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity style={styles.exportBtn} onPress={exportPDF}>
           <Text style={styles.exportText}>Export as PDF</Text>
         </TouchableOpacity>
 
-        <TabView
-          navigationState={{ index, routes }}
-          renderScene={renderScene}
-          onIndexChange={setIndex}
-          initialLayout={{ width: layout.width }}
-          renderTabBar={renderTabBar}
-        />
+        {filteredData.length === 0 ? (
+          <Text style={{ textAlign: "center", marginTop: 20 }}>
+            No {selectedTab} history found.
+          </Text>
+        ) : (
+          <FlatList
+            data={filteredData}
+            keyExtractor={(_, i) => i.toString()}
+            renderItem={renderItem}
+          />
+        )}
       </View>
+      <BottomBar />
     </SafeAreaView>
   );
 }

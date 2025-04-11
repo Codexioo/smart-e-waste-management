@@ -14,8 +14,8 @@ export default function BottomTabs() {
       <TouchableOpacity onPress={() => router.push('/(tabs)/profile')}>
         <Ionicons name="person-circle" size={24} color="gray" />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push('/(tabs)')}>
-        <Ionicons name="call" size={24} color="gray" />
+      <TouchableOpacity onPress={() => router.push('/(tabs)/settings')}>
+        <Ionicons name="settings" size={24} color="gray" />
       </TouchableOpacity>
     </View>
   );
