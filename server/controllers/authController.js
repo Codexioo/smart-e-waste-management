@@ -5,10 +5,12 @@ const sendOtpEmail = require("../utils/sendOtp");
 exports.checkUser = (req, res) => {
   const { email } = req.body;
 
-  if (!email) return res.status(400).json({ success: false, message: "Email is required" });
+  if (!email) {
+    return res.status(400).json({ success: false, message: "Email is required" });
+  }
 
   db.get(
-    `SELECT user_name, total_reward_points FROM users WHERE email = ?`,
+    `SELECT username, total_reward_points FROM users WHERE email = ?`,
     [email],
     (err, user) => {
       if (err) return res.status(500).json({ success: false, message: "Database error" });

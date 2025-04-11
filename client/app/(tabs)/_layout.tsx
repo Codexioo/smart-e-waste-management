@@ -70,10 +70,10 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="index"
+        name="settings"
         options={{
           tabBarIcon: ({ size, color }) => (
-            <Ionicons name="call" size={size} color={color} />
+            <Ionicons name="settings" size={size} color={color} />
           ),
         }}
       />

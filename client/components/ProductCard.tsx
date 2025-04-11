@@ -48,7 +48,7 @@ const ProductCard = ({
         onPress={onAddToCart}
         disabled={quantity === 0}
       >
-        <Text style={styles.addButtonText}>Add to Cart ({quantity})</Text>
+        <Text style={styles.addButtonText}>Add to Cart {quantity}</Text>
       </TouchableOpacity>
     </View>
   );

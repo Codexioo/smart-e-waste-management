@@ -1,4 +1,5 @@
 const transporter = require('./mailer');
+require('dotenv').config();
 
 const sendOrderEmail = (email, items, totalPoints) => {
   const now = new Date();
@@ -32,7 +33,7 @@ const sendOrderEmail = (email, items, totalPoints) => {
   `;
 
   const mailOptions = {
-    from: 'youremail@gmail.com',
+    from: process.env.EMAIL_USER,
     to: email,
     subject: 'Your Smart E-Waste Order Confirmation',
     html,

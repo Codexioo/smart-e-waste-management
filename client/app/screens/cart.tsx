@@ -7,11 +7,19 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import axios from "../../api/axiosInstance";
 import styles from "../../styles/cartStyles";
+import {
+  getCart,
+  removeFromCart,
+  clearCart as clearCartAPI,
+  addToCart,
+} from "../../services/cartService";
+import { getRewards } from "../../services/rewardsService";
+import { checkout } from "../../services/ordersService";
+import { useRouter } from "expo-router";
+import BottomBar from "../../components/bottombar";
 
 type CartItem = {
   product_id: number;
@@ -25,115 +33,71 @@ export default function CartScreen() {
   const [totalPoints, setTotalPoints] = useState(0);
   const [userPoints, setUserPoints] = useState<number>(0);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
+  const router = useRouter();
 
-  const loadCart = async () => {
-    const savedCart = await AsyncStorage.getItem("cart");
-    if (savedCart) {
-      const parsed = JSON.parse(savedCart);
-      setCartItems(parsed);
-      const total = parsed.reduce(
-        (sum: number, item: CartItem) => sum + item.price * item.quantity,
-        0
-      );
-      setTotalPoints(total);
-    }
-  };
-
-  const fetchUserPoints = async () => {
-    try {
-      const email = "chamikara38@gmail.com";
-      const res = await axios.get(`/rewards?email=${email}`);
-      if (res.data.success) {
-        setUserPoints(res.data.totalPoints);
-      }
-    } catch {
-      Alert.alert("Failed to fetch user points");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const saveCart = async (updatedCart: CartItem[]) => {
-    await AsyncStorage.setItem("cart", JSON.stringify(updatedCart));
-    setCartItems(updatedCart);
-    const total = updatedCart.reduce(
-      (sum: number, item: CartItem) => sum + item.price * item.quantity,
+  const calculateTotal = (items: CartItem[]) => {
+    const total = items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
       0
     );
     setTotalPoints(total);
   };
 
-  const updateQuantity = async (productId: number, delta: number) => {
-    const updatedCart = cartItems
-      .map((item) => {
-        if (item.product_id === productId) {
-          const newQuantity = item.quantity + delta;
-          if (newQuantity <= 0) return null;
-          return { ...item, quantity: newQuantity };
-        }
-        return item;
-      })
-      .filter(Boolean);
+  const fetchData = async () => {
+    try {
+      const res = await getCart();
+      setCartItems(res.cart);
+      calculateTotal(res.cart);
 
-    await saveCart(updatedCart as CartItem[]);
-  };
-
-  const removeItem = async (productId: number) => {
-    Alert.alert("Remove Item", "Are you sure you want to remove this item?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Remove",
-        style: "destructive",
-        onPress: async () => {
-          const updatedCart = cartItems.filter(
-            (item) => item.product_id !== productId
-          );
-          await saveCart(updatedCart);
-          Alert.alert("Item removed from cart");
-        },
-      },
-    ]);
+      const rewardRes = await getRewards();
+      if (rewardRes.success) {
+        setUserPoints(rewardRes.totalPoints);
+      }
+    } catch (err) {
+      Alert.alert("Failed to load cart or points");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const clearCart = async () => {
-    await AsyncStorage.removeItem("cart");
+    await clearCartAPI();
     setCartItems([]);
     setTotalPoints(0);
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (totalPoints > userPoints) {
-      Alert.alert("Insufficient points to complete checkout.");
+      Alert.alert("Insufficient points", "You don't have enough points to complete checkout.");
       return;
     }
 
     Alert.alert(
       "Confirm Checkout",
-      `Proceed with checkout and spend ${totalPoints} points?`,
+      `Are you sure you want to spend ${totalPoints} points for checkout?`,
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Confirm",
           onPress: async () => {
             try {
-              const email = "chamikara38@gmail.com";
-              const res = await axios.post("/checkout", {
-                email,
-                items: cartItems,
-              });
-
-              if (res.data.success) {
-                Alert.alert("Checkout successful! Email sent.");
-                clearCart();
-                navigation.navigate("shop" as never);
+              const res = await checkout(cartItems);
+              if (res.success) {
+                Alert.alert("Order Placed Successfully!", "", [
+                  {
+                    text: "OK",
+                    onPress: async () => {
+                      await clearCart();
+                      router.push("/screens/shop");
+                    },
+                  },
+                ]);
               } else {
-                Alert.alert(res.data.message || "Checkout failed.");
+                Alert.alert("Checkout Failed", res.message || "Something went wrong.");
               }
-            } catch (err: any) {
-              const msg =
-                err.response?.data?.message || "Network error. Try again.";
-              Alert.alert(msg);
+            } catch (err) {
+              Alert.alert("Network error. Try again.");
+              console.error("Checkout error:", err);
             }
           },
         },
@@ -141,10 +105,32 @@ export default function CartScreen() {
     );
   };
 
+  const handleRemove = async (productId: number) => {
+    await removeFromCart(productId);
+    const updatedCart = cartItems.filter((item) => item.product_id !== productId);
+    setCartItems(updatedCart);
+    calculateTotal(updatedCart);
+  };
+
+  const updateQuantity = async (item: CartItem, delta: number) => {
+    const newQuantity = item.quantity + delta;
+    if (newQuantity < 1) return;
+
+    try {
+      await addToCart(item.product_id, newQuantity);
+      const updatedCart = cartItems.map((ci) =>
+        ci.product_id === item.product_id ? { ...ci, quantity: newQuantity } : ci
+      );
+      setCartItems(updatedCart);
+      calculateTotal(updatedCart);
+    } catch (err) {
+      Alert.alert("Failed to update quantity");
+    }
+  };
+
   useFocusEffect(
     React.useCallback(() => {
-      loadCart();
-      fetchUserPoints();
+      fetchData();
     }, [])
   );
 
@@ -152,29 +138,29 @@ export default function CartScreen() {
     <View style={styles.cartItem}>
       <Text style={styles.name}>{item.product_name}</Text>
       <Text style={styles.info}>
-        Quantity: {item.quantity} | Total: {item.quantity * item.price} pts
+        Total: {item.quantity * item.price} pts
       </Text>
 
       <View style={styles.quantityControls}>
         <TouchableOpacity
-          style={styles.quantityButton}
-          onPress={() => updateQuantity(item.product_id, -1)}
+          onPress={() => updateQuantity(item, -1)}
+          style={styles.qtyButton}
         >
-          <Text style={styles.quantityText}>−</Text>
+          <Text style={styles.qtyText}>−</Text>
         </TouchableOpacity>
 
-        <Text style={styles.quantityText}>{item.quantity}</Text>
+        <Text style={styles.qtyValue}>{item.quantity}</Text>
 
         <TouchableOpacity
-          style={styles.quantityButton}
-          onPress={() => updateQuantity(item.product_id, 1)}
+          onPress={() => updateQuantity(item, 1)}
+          style={styles.qtyButton}
         >
-          <Text style={styles.quantityText}>+</Text>
+          <Text style={styles.qtyText}>+</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.removeButton}
-          onPress={() => removeItem(item.product_id)}
+          onPress={() => handleRemove(item.product_id)}
         >
           <Text style={styles.removeText}>Remove</Text>
         </TouchableOpacity>
@@ -220,6 +206,7 @@ export default function CartScreen() {
           </TouchableOpacity>
         </>
       )}
+      <BottomBar />
     </SafeAreaView>
   );
 }
