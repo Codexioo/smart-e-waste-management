@@ -1,95 +1,108 @@
 # ♻️ Smart E-Waste System
 
-A mobile and web-based platform designed to optimize electronic waste (e-waste) collection, incentivize users through a gamified reward system with **user levels**, and reduce environmental impact through efficient recycling processes.
+![Expo](https://img.shields.io/badge/Expo-React%20Native-blue)
+![Node.js](https://img.shields.io/badge/Node.js-Backend-green)
+![SQLite](https://img.shields.io/badge/SQLite-Database-lightgrey)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
+A cross-platform system for optimizing electronic waste (e-waste) collection and promoting sustainability through gamification, smart routing, and digital incentives.
+
+---
+
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Getting Started](#-getting-started)
+- [Running the Project](#-running-the-project)
+- [Admin Dashboard](#-admin-dashboard)
+- [Modules](#-key-modules)
+- [Team](#-team-members)
+- [License](#-license)
 
 ---
 
 ## 🚀 Features
 
-- 🔐 **Role-Based Authentication** – Secure login for users, collectors, and admins with OTP/password-based access.
-- 🗓 **Pickup Request & Scheduling** – Users can request e-waste pickups; admins approve and schedule them.
-- 🛍 **Reward System & User Levels** – Users earn points based on waste weight, level up through milestones, and redeem rewards.
-- 📍 **Route Optimization** – Smart routing using Google Maps API for efficient waste collection logistics.
-- 📊 **Reports & Dashboards** – Real-time management dashboards and transaction/report generation for all roles.
+- 🔐 **Secure Authentication** – Role-based login with OTP and password support.
+- 🗓️ **Pickup Request System** – Schedule and manage e-waste collection via app.
+- 🏆 **Gamified Rewards & Levels** – Earn points, level up, and redeem real rewards.
+- 🧭 **Route Optimization** – Google Maps API for smart waste collection routing.
+- 📈 **Dashboards & Reporting** – Real-time data views for users, collectors, and admins.
 
 ---
 
-## 📱 Technologies Used
+## 🛠 Tech Stack
 
-- **Frontend (Mobile App):** React Native with Expo
-- **Backend API:** Node.js + Express
-- **Database:** SQLite
-- **Maps & Routing:** Google Maps API
-- **Authentication:** OTP-based verification & JWT
+| Layer       | Technology             |
+|-------------|-------------------------|
+| Mobile App  | React Native (Expo)     |
+| Backend     | Node.js + Express       |
+| Database    | SQLite                  |
+| Web Admin   | React (Vite/CRA)        |
+| Maps/Routing| Google Maps API         |
+| Auth        | JWT & OTP Verification  |
 
 ---
 
-## 🔧 Getting Started
+## ⚙️ Getting Started
 
 ### Prerequisites
 
-- Node.js
-- Expo CLI (`npm install -g expo-cli`)
+- Node.js (v18+ recommended)
+- Expo CLI: `npm install -g expo-cli`
+- Git
 - Android/iOS device or emulator
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/smart-ewaste-system.git
-   cd smart-ewaste-system
-   ```
+```bash
+# Clone repository
+git clone https://github.com/yourusername/smart-ewaste-system.git
+cd smart-ewaste-system
 
-2. **Install backend dependencies**
-   ```bash
-   cd server
-   npm install
-   ```
+# Setup backend
+cd server
+npm install
 
-3. **Install mobile app dependencies**
-   ```bash
-   cd ../client
-   npm install
-   ```
+# Setup mobile app
+cd ../client
+npm install
+```
 
 ---
 
-## 🛠 Running the Project
+## ▶️ Running the Project
 
-### 1️⃣ Start the Backend Server
+### Start Backend
 
 ```bash
 cd server
 node server.js
 ```
 
-### 2️⃣ Launch the Mobile App (Expo)
+### Start Mobile App
 
 ```bash
 cd ../client
 npx expo start
 ```
 
-Scan the QR code using the Expo Go app or run it in an emulator.
+Use **Expo Go** or an emulator to run the app.
 
 ---
 
 ## 🖥 Admin Dashboard
 
-The web-based admin panel allows admins to manage pickup requests, assign collectors, track user activities, and generate reports.
-
-- **Frontend**: React (`web-admin-client`)
-- **Backend**: Node.js (`web-admin-server`)
-
-Start them as follows:
+Admins manage pickups, collectors, and reports through a web portal.
 
 ```bash
+# Start admin backend
 cd web-admin-server
 npm install
 node server.js
-```
 
-```bash
+# Start admin frontend
 cd ../web-admin-client
 npm install
 npm start
@@ -97,24 +110,31 @@ npm start
 
 ---
 
-## 💡 Key Modules
+## 📦 Key Modules
 
-- **Secure Authentication**
-- **OTP-Based Collection Verification**
-- **User Levels & Reward Milestones**
-- **In-App Store (Gifts, Donations, Vouchers)**
-- **Route Optimization**
-- **Real-Time Notifications**
-- **Admin/Collector/User Dashboards**
+- 🔑 **Role-Based Access & OTP Login**
+- 🏅 **Rewards, Levels & In-App Store**
+- 📍 **Google Maps Route Optimization**
+- 📲 **Pickup Request & Collector Assignment**
+- 📊 **Analytics & Reporting Tools**
 
 ---
 
 ## 👥 Team Members
 
-- Rajapaksha R M S N R
-- Rodrigo U M T H
-- Perera W P M A N
-- Bandara N G J C
+- Rajapaksha R M S N R  
+- Rodrigo U M T H  
+- Perera W P M A N  
+- Bandara N G J C  
 
-This project is part of a university coursework under the ITPM 3rd Year 2nd Semester curriculum.
+> Developed as part of the university curriculum (ITPM – 3rd Year, 2nd Semester)
 
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+Ready to take the future of e-waste recycling into your hands. ♻️
