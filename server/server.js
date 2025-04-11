@@ -13,10 +13,10 @@ const authRoutes = require('./routes/authRoutes');
 const rewardRoutes = require('./routes/rewardRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const productRoutes = require('./routes/productRoutes');
-
+const cartRoutes = require('./routes/cartRoutes');
 
 const app = express();
-const PORT = 5000;
+const PORT = 3001;
 
 app.use(cors());
 //app.use(bodyParser.json());
@@ -37,6 +37,7 @@ app.use('/', authRoutes);
 app.use('/', rewardRoutes);
 app.use('/', orderRoutes);
 app.use('/', productRoutes);
+app.use('/', cartRoutes);
 
 
 // Start Server

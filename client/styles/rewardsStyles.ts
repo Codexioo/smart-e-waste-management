@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
   totalPoints: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 30,
   },
   exportBtn: {
     marginBottom: 12,
@@ -51,6 +51,31 @@ const styles = StyleSheet.create({
     color: "red",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  // ✅ New styles for tab buttons
+  tabBarAlt: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  tabButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    backgroundColor: "#eee",
+    marginHorizontal: 8,
+  },
+  activeTab: {
+    backgroundColor: "green",
+  },
+  tabText: {
+    fontSize: 14,
+    color: "#333",
+    fontWeight: "500",
+  },
+  activeTabText: {
+    color: "#fff",
   },
 });
 
