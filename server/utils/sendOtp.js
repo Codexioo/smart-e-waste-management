@@ -1,8 +1,9 @@
 const transporter = require('./mailer');
+require('dotenv').config();
 
 const sendOtp = async (email, otp) => {
   const mailOptions = {
-    from: '"Smart E-Waste System" smartewaste.sys@gmail.com',
+    from: `"Smart E-Waste System" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: 'Your Smart E-Waste OTP Code (valid for 5 minutes)',
     text: `
@@ -21,7 +22,7 @@ If you didn't request this, you can safely ignore this email.
 Thanks,  
 The Smart E-Waste Team
     `.trim(),
-    replyTo: 'support@smartewaste.com', // optional but helpful
+    replyTo: 'support@smartewaste.com',
   };
 
   return transporter.sendMail(mailOptions);

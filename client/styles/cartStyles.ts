@@ -57,9 +57,32 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 6,
     alignItems: "center",
+    marginBottom: 20,
   },
   checkoutText: { color: "white", fontWeight: "bold" },
   disabledButton: { backgroundColor: "#aaa" },
+
+  qtyButton: {
+    backgroundColor: "#444",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    marginHorizontal: 4,
+  },
+  
+  qtyText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  
+  qtyValue: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginHorizontal: 8,
+    color: "#000",
+  },
+  
 });
 
 export default styles;

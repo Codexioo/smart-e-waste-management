@@ -1,24 +1,8 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
 const db = require('../database');
+const authenticate = require('../middleware/auth'); // ✅ shared auth middleware
+
 const router = express.Router();
-
-const SECRET_KEY = "your_secret_key"; // Same as in login/signup
-
-// 🛡️ Auth middleware
-const authenticate = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ error: 'Missing token' });
-
-  const token = authHeader.split(" ")[1];
-  try {
-    const decoded = jwt.verify(token, SECRET_KEY);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({ error: 'Invalid token' });
-  }
-};
 
 // 🧾 GET /profile
 router.get('/profile', authenticate, (req, res) => {
@@ -36,7 +20,7 @@ router.get('/profile', authenticate, (req, res) => {
   );
 });
 
-// 🔄 Update Profile Info
+// 🔄 PUT /profile
 router.put('/profile', authenticate, (req, res) => {
   const userId = req.user.id;
   const { username, telephone, address, profile_image } = req.body;
@@ -60,7 +44,7 @@ router.put('/profile', authenticate, (req, res) => {
   });
 });
 
-//  Delete Profile account
+// ❌ DELETE /profile
 router.delete('/profile', authenticate, (req, res) => {
   const userId = req.user.id;
 
@@ -72,7 +56,5 @@ router.delete('/profile', authenticate, (req, res) => {
     res.json({ message: "Account deleted successfully" });
   });
 });
-
-
 
 module.exports = router;

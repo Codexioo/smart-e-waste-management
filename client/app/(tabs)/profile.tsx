@@ -1,3 +1,4 @@
+// screens/profile.tsx
 import {
   View,
   Text,
@@ -5,17 +6,15 @@ import {
   ActivityIndicator,
   TextInput,
   Alert,
-  Image, 
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import styles from "../../styles/profile.styles";
 import { Ionicons } from "@expo/vector-icons";
 import COLORS from "../../constants/colors";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import axios from "../../api/axiosInstance";
 import useProtectedRoute from "@/hooks/useProtectedRoute";
-import * as ImagePicker from 'expo-image-picker';
+import { getToken, getUser, setUser, clearStorage } from "@/utils/storage";
 
 export default function Profile() {
   useProtectedRoute();
@@ -27,31 +26,13 @@ export default function Profile() {
   const [isLoading, setIsLoading] = useState(false);
   const [isProfileLoading, setIsProfileLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState("");
 
   const router = useRouter();
 
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 0.3,
-      base64: true,
-    });
-  
-    if (!result.canceled) {
-      const imageBase64 = result.assets[0].base64;
-      const base64Image = `data:image/jpeg;base64,${imageBase64}`;
-      setProfileImage(base64Image); // for preview + sending to backend
-    }
-  };
-  
-  
-  
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
+        const token = await getToken();
         if (!token) {
           alert("Unauthorized. Please login again.");
           router.replace("/(auth)");
@@ -67,7 +48,6 @@ export default function Profile() {
         setEmail(user.email);
         setTelephone(user.telephone);
         setAddress(user.address);
-        setProfileImage(user.profile_image || ""); 
       } catch (error) {
         console.error("Profile load error:", error);
         alert("Failed to load profile.");
@@ -86,34 +66,19 @@ export default function Profile() {
   const handleSave = async () => {
     try {
       setIsLoading(true);
-      const token = await AsyncStorage.getItem("token");
-  
-      const response = await axios.put(
+      const token = await getToken();
+
+      await axios.put(
         "/profile",
-        {
-          username: name,
-          telephone,
-          address,
-          profile_image: profileImage,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { username: name, telephone, address },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-  
-      // ✅ Update AsyncStorage with new user data
-      const updatedUser = {
-        ...(JSON.parse(await AsyncStorage.getItem("user") || "{}")),
-        username: name,
-        telephone,
-        address,
-      };
-      await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
-  
-      // ✅ Show success confirmation
+
+      const oldUser = await getUser();
+      const updatedUser = { ...oldUser, username: name, telephone, address };
+      await setUser(updatedUser);
+
       Alert.alert("Success", "Your profile was updated successfully!");
-  
-      // ✅ Exit edit mode
       setIsEditing(false);
     } catch (error) {
       console.error("Save error:", error);
@@ -122,18 +87,17 @@ export default function Profile() {
       setIsLoading(false);
     }
   };
-  
+
   const handleDelete = async () => {
-    console.log("🧨 Delete button pressed");
     try {
       setIsLoading(true);
-      const token = await AsyncStorage.getItem("token");
-  
+      const token = await getToken();
+
       await axios.delete("/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
-      await AsyncStorage.multiRemove(["user", "token", "role"]);
+
+      await clearStorage();
       alert("Account deleted.");
       router.replace("/(auth)");
     } catch (error) {
@@ -143,14 +107,10 @@ export default function Profile() {
       setIsLoading(false);
     }
   };
-  
+
   const handleLogout = async () => {
-    try {
-      await AsyncStorage.multiRemove(["user", "token", "role"]);
-      router.replace("/(auth)");
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
+    await clearStorage();
+    router.replace("/(auth)");
   };
 
   if (isProfileLoading) {
@@ -165,25 +125,6 @@ export default function Profile() {
     <View style={styles.container}>
       <View style={styles.card}>
         <Text style={styles.title}>Profile Informations</Text>
-
-        <View style={styles.profileContainer}>
-  {profileImage ? (
-    <>
-      <Image source={{ uri: profileImage }} style={styles.profileImage} />
-      {isEditing && (
-        <TouchableOpacity onPress={() => setProfileImage("")}>
-          <Text style={styles.removeImageText}>Remove Image</Text>
-        </TouchableOpacity>
-      )}
-    </>
-  ) : (
-    isEditing && (
-      <TouchableOpacity onPress={pickImage}>
-        <Text style={styles.addImageText}>Add Profile Image</Text>
-      </TouchableOpacity>
-    )
-  )}
-</View>
 
         <Text style={styles.label}>Username</Text>
         <View style={styles.inputContainer}>
@@ -228,7 +169,6 @@ export default function Profile() {
           />
         </View>
 
-        {/* Buttons */}
         <View style={styles.buttonContainer}>
           {isEditing ? (
             <>

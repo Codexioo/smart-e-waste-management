@@ -1,4 +1,5 @@
 const transporter = require('./mailer');
+require('dotenv').config();
 
 const sendWasteEmail = (email, points, wasteType, weight) => {
   const now = new Date();
@@ -23,7 +24,7 @@ const sendWasteEmail = (email, points, wasteType, weight) => {
   `;
 
   return transporter.sendMail({
-    from: 'youremail@gmail.com',
+    from: process.env.EMAIL_USER,
     to: email,
     subject: 'Smart E-Waste – Points Credited Successfully',
     html,
