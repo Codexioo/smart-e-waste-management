@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import '../styles/requests.css'; 
+import Modal from 'react-modal';
+import '../styles/requests.css';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+Modal.setAppElement('#root');
 
 const Requests = () => {
   interface Request {
@@ -8,13 +13,17 @@ const Requests = () => {
     request_code: string;
     create_date: string;
     user_name: string;
+    email: string;
+    telephone: string;
     district: string;
     city: string;
     address: string;
+    waste_types: string;
     status: string;
   }
 
   const [requests, setRequests] = useState<Request[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [search, setSearch] = useState('');
   const [district, setDistrict] = useState('');
   const [city, setCity] = useState('');
@@ -27,6 +36,35 @@ const Requests = () => {
       })
       .catch(err => console.error('❌ Error fetching data:', err));
   }, []);
+
+  const handleStatusUpdate = async (id: number, status: string) => {
+    try {
+      await axios.put(`http://localhost:9091/api/requests/${id}/status`, { status });
+      setRequests(prev =>
+        prev.map(r => (r.id === id ? { ...r, status } : r))
+      );
+  
+      toast.success(`Request successfully ${status === 'accepted' ? 'approved' : 'rejected'}! 🎉`, {
+        position: "top-center",
+        autoClose: 3000,
+        style: {
+          marginTop: '50px',
+          marginLeft: '200px'
+        }
+      });
+  
+      setTimeout(() => {
+        setSelectedRequest(null); // Close modal after toast
+      }, 2000);
+  
+    } catch (err) {
+      console.error('❌ Status update failed', err);
+      toast.error('Failed to update request status.', {
+        position: "top-center",
+      });
+    }
+  };
+
 
   const filtered = requests.filter(req => {
     return (
@@ -56,7 +94,7 @@ const Requests = () => {
           <option value="Negombo">Negombo</option>
           <option value="Peradeniya">Peradeniya</option>
         </select>
-        
+
         <button className="reset-btn" onClick={() => {
           setSearch('');
           setDistrict('');
@@ -88,11 +126,44 @@ const Requests = () => {
               <td>{req.city}</td>
               <td>{req.address}</td>
               <td><span className={`badge ${req.status}`}>{req.status}</span></td>
-              <td><button className="view-btn">View</button></td>
+              <td><button className="view-btn" onClick={() => setSelectedRequest(req)}>View</button></td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      <Modal
+        isOpen={!!selectedRequest}
+        onRequestClose={() => setSelectedRequest(null)}
+        contentLabel="Request Details"
+        className="modal modal-lg"
+        overlayClassName="overlay"
+      >
+        {selectedRequest && (
+          <>
+            <h2>Request Details</h2>
+            <div className="modal-details">
+              <p><strong>Status:</strong> {selectedRequest.status}</p>
+              <p><strong>Date:</strong> {selectedRequest.create_date.split('T')[0]}</p>
+              <p><strong>Request Code:</strong> {selectedRequest.request_code}</p>
+              <p><strong>Name:</strong> {selectedRequest.user_name}</p>
+              <p><strong>Email:</strong> {selectedRequest.email || 'N/A'}</p>
+              <p><strong>Phone:</strong> {selectedRequest.telephone || 'N/A'}</p>
+              <p><strong>Address:</strong> {selectedRequest.address}</p>
+              <p><strong>District:</strong> {selectedRequest.district}</p>
+              <p><strong>City:</strong> {selectedRequest.city}</p>
+              <p><strong>Waste Types:</strong> {selectedRequest.waste_types || 'N/A'}</p>
+            </div>
+
+            <div className="modal-actions">
+              <button className="btn-approve" onClick={() => handleStatusUpdate(selectedRequest.id, 'accepted')}>Approve</button>
+              <button className="btn-reject" onClick={() => handleStatusUpdate(selectedRequest.id, 'rejected')}>Reject</button>
+              <button className="btn-cancel" onClick={() => setSelectedRequest(null)}>Cancel</button>
+            </div>
+          </>
+        )}
+      </Modal>
+      <ToastContainer/>
     </div>
   );
 };

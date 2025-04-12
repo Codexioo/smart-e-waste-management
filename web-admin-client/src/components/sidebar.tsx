@@ -10,8 +10,10 @@ const Sidebar: React.FC = () => {
     { label: 'Dashboard', path: '/dashboard' },
     { label: 'Users', path: '/users' },
     { label: 'Pickup Requests', path: '/requests' },
+    { label: 'Assign Collectors', path: '/assign-collectors' },
     { label: 'Rewards', path: '/rewards' },
     { label: 'Products', path: '/products' },
+
   ];
 
   const handleLogout = () => {

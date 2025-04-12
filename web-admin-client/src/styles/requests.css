@@ -81,3 +81,55 @@
     font-weight: 600;
     cursor: pointer;
   }
+
+  .modal.modal-lg {
+    position: absolute;
+    top: 50%;
+    left: 60%;
+    width: 90%;
+    max-width: 1050px;
+    background: #fff;
+    padding: 30px;
+    transform: translate(-50%, -50%);
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .modal-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  
+  .btn-approve {
+    background-color: #2ecc71;
+    color: #fff;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .btn-reject {
+    background-color: #e74c3c;
+    color: #fff;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .btn-cancel {
+    background-color: #95a5a6;
+    color: #fff;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+  }
