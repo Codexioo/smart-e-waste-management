@@ -28,6 +28,7 @@ const Requests = () => {
   const [district, setDistrict] = useState('');
   const [city, setCity] = useState('');
   const [date, setDate] = useState('');
+  const [status, setStatus] = useState('');
 
   useEffect(() => {
     axios.get('http://localhost:9091/api/requests')
@@ -71,7 +72,8 @@ const Requests = () => {
       (!search || req.request_code.toLowerCase().includes(search.toLowerCase())) &&
       (!district || req.district === district) &&
       (!city || req.city === city) &&
-      (!date || req.create_date.startsWith(date))
+      (!date || req.create_date.startsWith(date)) &&
+      (!status || req.status === status)
     );
   });
 
@@ -94,6 +96,13 @@ const Requests = () => {
           <option value="Negombo">Negombo</option>
           <option value="Peradeniya">Peradeniya</option>
         </select>
+        <select value={status} onChange={e => setStatus(e.target.value)}>
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="accepted">Accepted</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        
 
         <button className="reset-btn" onClick={() => {
           setSearch('');
