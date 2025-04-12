@@ -42,7 +42,8 @@ const Requests = () => {
       <h2 className="page-title">Pickup Requests</h2>
 
       <div className="filters">
-        <input placeholder="Search by Name" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <input placeholder="Search by Request Code" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <input type="date" value={date} onChange={e => setDate(e.target.value)} />
         <select value={district} onChange={e => setDistrict(e.target.value)}>
           <option value="">All Districts</option>
           <option value="Colombo">Colombo</option>
@@ -55,7 +56,7 @@ const Requests = () => {
           <option value="Negombo">Negombo</option>
           <option value="Peradeniya">Peradeniya</option>
         </select>
-        <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+        
         <button className="reset-btn" onClick={() => {
           setSearch('');
           setDistrict('');
