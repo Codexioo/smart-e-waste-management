@@ -19,6 +19,7 @@ app.use('/api/requests', pickupRoutes);
 app.use('/api/admin', adminAuthRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/requests', pickupRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Admin server running at http://localhost:${PORT}`);
