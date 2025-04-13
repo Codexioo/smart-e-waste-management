@@ -76,6 +76,7 @@ db.serialize(() => {
       transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER,
       points INTEGER,
+      source TEXT,
       transaction_type TEXT,
       transaction_date TEXT,
       FOREIGN KEY(user_id) REFERENCES users(id)
@@ -92,7 +93,8 @@ db.serialize(() => {
       product_name TEXT,
       product_desc TEXT,
       price INTEGER,
-      stock_quantity INTEGER
+      stock_quantity INTEGER,
+      min_level_required INTEGER DEFAULT 1
     )
   `, (err) => {
     if (err) console.error('❌ Error creating products table:', err);
