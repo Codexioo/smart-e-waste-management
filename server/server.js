@@ -14,6 +14,7 @@ const rewardRoutes = require('./routes/rewardRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const productRoutes = require('./routes/productRoutes');
 const cartRoutes = require('./routes/cartRoutes');
+const wasteRoutes = require('./routes/wasteRoutes');
 
 const app = express();
 const PORT = 3001;
@@ -38,7 +39,7 @@ app.use('/', rewardRoutes);
 app.use('/', orderRoutes);
 app.use('/', productRoutes);
 app.use('/', cartRoutes);
-
+app.use('/', wasteRoutes);
 
 // Start Server
 app.listen(PORT, () => {

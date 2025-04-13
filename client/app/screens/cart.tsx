@@ -3,12 +3,14 @@ import {
   View,
   Text,
   FlatList,
-  Alert,
   ActivityIndicator,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import Toast from "react-native-toast-message";
 import styles from "../../styles/cartStyles";
 import {
   getCart,
@@ -53,56 +55,84 @@ export default function CartScreen() {
       if (rewardRes.success) {
         setUserPoints(rewardRes.totalPoints);
       }
-    } catch (err) {
-      Alert.alert("Failed to load cart or points");
+    } catch {
+      Toast.show({ type: "error", text1: "Failed to load data" });
     } finally {
       setLoading(false);
     }
   };
 
-  const clearCart = async () => {
-    await clearCartAPI();
-    setCartItems([]);
-    setTotalPoints(0);
+  const confirmClearCart = () => {
+    Alert.alert("Clear All?", "Are you sure you want to remove all items from your cart?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Yes, Clear",
+        style: "destructive",
+        onPress: async () => {
+          await clearCartAPI();
+          setCartItems([]);
+          setTotalPoints(0);
+          Toast.show({
+            type: "success",
+            text1: "Cart cleared",
+          });
+          setTimeout(() => {
+            router.push("/screens/shop");
+          }, 500);
+        },
+      },
+    ]);
   };
 
   const handleCheckout = () => {
     if (totalPoints > userPoints) {
-      Alert.alert("Insufficient points", "You don't have enough points to complete checkout.");
+      Toast.show({
+        type: "error",
+        text1: "Not enough points!",
+        text2: "You need more points to complete checkout.",
+      });
       return;
     }
 
-    Alert.alert(
-      "Confirm Checkout",
-      `Are you sure you want to spend ${totalPoints} points for checkout?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Confirm",
-          onPress: async () => {
-            try {
-              const res = await checkout(cartItems);
-              if (res.success) {
-                Alert.alert("Order Placed Successfully!", "", [
-                  {
-                    text: "OK",
-                    onPress: async () => {
-                      await clearCart();
-                      router.push("/screens/shop");
-                    },
-                  },
-                ]);
-              } else {
-                Alert.alert("Checkout Failed", res.message || "Something went wrong.");
-              }
-            } catch (err) {
-              Alert.alert("Network error. Try again.");
-              console.error("Checkout error:", err);
+    Alert.alert("Confirm Checkout", `Spend ${totalPoints} points to place your order?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Yes, Place Order",
+        style: "default",
+        onPress: async () => {
+          try {
+            const res = await checkout(cartItems);
+            if (res.success) {
+              await clearCartAPI();
+              setCartItems([]);
+              setTotalPoints(0);
+
+              Toast.show({
+                type: "success",
+                text1: "✅ Order placed successfully!",
+                text2: "Redirecting to shop...",
+              });
+
+              setTimeout(() => {
+                router.push("/screens/shop");
+              }, 500);
+            } else {
+              Toast.show({
+                type: "error",
+                text1: "Checkout failed",
+                text2: res.message || "Something went wrong.",
+              });
             }
-          },
+          } catch {
+            Toast.show({
+              type: "error",
+              text1: "Network error",
+              text2: "Please try again.",
+            });
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleRemove = async (productId: number) => {
@@ -123,8 +153,11 @@ export default function CartScreen() {
       );
       setCartItems(updatedCart);
       calculateTotal(updatedCart);
-    } catch (err) {
-      Alert.alert("Failed to update quantity");
+    } catch {
+      Toast.show({
+        type: "error",
+        text1: "Failed to update quantity",
+      });
     }
   };
 
@@ -135,33 +168,30 @@ export default function CartScreen() {
   );
 
   const renderItem = ({ item }: { item: CartItem }) => (
-    <View style={styles.cartItem}>
-      <Text style={styles.name}>{item.product_name}</Text>
-      <Text style={styles.info}>
-        Total: {item.quantity * item.price} pts
-      </Text>
+    <View style={styles.productCard}>
+      <Text style={styles.productName}>{item.product_name}</Text>
+      <Text style={styles.productPrice}>Total: {item.quantity * item.price} pts</Text>
 
-      <View style={styles.quantityControls}>
-        <TouchableOpacity
-          onPress={() => updateQuantity(item, -1)}
-          style={styles.qtyButton}
-        >
-          <Text style={styles.qtyText}>−</Text>
-        </TouchableOpacity>
+      <View style={styles.quantityRow}>
+        <View style={styles.inlineQuantityControls}>
+          <TouchableOpacity
+            onPress={() => updateQuantity(item, -1)}
+            style={styles.quantityButton}
+          >
+            <Ionicons name="remove" size={18} color="#fff" />
+          </TouchableOpacity>
 
-        <Text style={styles.qtyValue}>{item.quantity}</Text>
+          <Text style={styles.qtyText}>{item.quantity}</Text>
 
-        <TouchableOpacity
-          onPress={() => updateQuantity(item, 1)}
-          style={styles.qtyButton}
-        >
-          <Text style={styles.qtyText}>+</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => updateQuantity(item, 1)}
+            style={styles.quantityButton}
+          >
+            <Ionicons name="add" size={18} color="#fff" />
+          </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity
-          style={styles.removeButton}
-          onPress={() => handleRemove(item.product_id)}
-        >
+        <TouchableOpacity style={styles.removeButton} onPress={() => handleRemove(item.product_id)}>
           <Text style={styles.removeText}>Remove</Text>
         </TouchableOpacity>
       </View>
@@ -178,34 +208,46 @@ export default function CartScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Your Cart</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Cart</Text>
+      </View>
 
       {cartItems.length === 0 ? (
-        <Text>No items in cart</Text>
+        <Text style={{ fontSize: 16, color: "#555" }}>Your cart is empty.</Text>
       ) : (
         <>
           <FlatList
             data={cartItems}
             keyExtractor={(item) => item.product_id.toString()}
             renderItem={renderItem}
+            contentContainerStyle={{ paddingBottom: 120 }}
           />
+
           <View style={styles.summary}>
             <Text style={styles.total}>Total Points Required: {totalPoints}</Text>
             <Text style={styles.total}>Your Available Points: {userPoints}</Text>
-          </View>
 
-          <TouchableOpacity
-            style={[
-              styles.checkoutButton,
-              totalPoints > userPoints && styles.disabledButton,
-            ]}
-            onPress={handleCheckout}
-            disabled={cartItems.length === 0 || totalPoints > userPoints}
-          >
-            <Text style={styles.checkoutText}>Checkout</Text>
-          </TouchableOpacity>
+            <View style={styles.actionsRow}>
+              <TouchableOpacity
+                style={[
+                  styles.checkoutButton,
+                  totalPoints > userPoints && styles.disabledButton,
+                ]}
+                onPress={handleCheckout}
+                disabled={totalPoints > userPoints}
+              >
+                <Text style={styles.checkoutText}>Checkout</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.clearButton} onPress={confirmClearCart}>
+                <Text style={styles.clearText}>Clear All</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </>
       )}
+
+      <Toast />
       <BottomBar />
     </SafeAreaView>
   );
