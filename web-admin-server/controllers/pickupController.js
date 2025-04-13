@@ -1,5 +1,6 @@
-const db = require('../database'); // Adjusted to point to app DB
+const db = require('../database');
 
+// ✅ Fetch all pickup requests with user details
 const getAllPickupRequests = (req, res) => {
   const query = `
     SELECT 
@@ -28,7 +29,7 @@ const getAllPickupRequests = (req, res) => {
   });
 };
 
-// for status update
+// ✅ Update pickup request status
 const updatePickupStatus = (req, res) => {
   const requestId = req.params.id;
   const { status } = req.body;
@@ -44,10 +45,36 @@ const updatePickupStatus = (req, res) => {
       return res.status(500).json({ error: 'Failed to update request status' });
     }
     res.json({ success: true, message: 'Status updated successfully' });
-
   });
-  
-
 };
 
-module.exports = { getAllPickupRequests, updatePickupStatus };
+// ✅ Edit pickup request (address, district, city, waste_types)
+const updatePickupRequest = (req, res) => {
+  const requestId = req.params.id;
+  const { address, district, city, waste_types } = req.body;
+
+  if (!address || !district || !city || !waste_types) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  const sql = `
+    UPDATE pickup_requests
+    SET address = ?, district = ?, city = ?, waste_types = ?
+    WHERE id = ?
+  `;
+
+  db.run(sql, [address, district, city, waste_types, requestId], function (err) {
+    if (err) {
+      console.error('❌ Edit request error:', err);
+      return res.status(500).json({ error: 'Failed to update pickup request' });
+    }
+
+    res.json({ success: true, message: 'Pickup request updated successfully' });
+  });
+};
+
+module.exports = {
+  getAllPickupRequests,
+  updatePickupStatus,
+  updatePickupRequest,
+};
