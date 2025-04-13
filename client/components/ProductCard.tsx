@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "../styles/shopStyles";
+import * as Animatable from "react-native-animatable";
 
 type Props = {
   name: string;
@@ -11,7 +12,8 @@ type Props = {
   quantity: number;
   onIncrease: () => void;
   onDecrease: () => void;
-  onAddToCart: () => void;
+  userLevel: number;
+  minLevel: number;
 };
 
 const ProductCard = ({
@@ -22,35 +24,52 @@ const ProductCard = ({
   quantity,
   onIncrease,
   onDecrease,
-  onAddToCart,
+  userLevel,
+  minLevel,
 }: Props) => {
+  const isLocked = userLevel < minLevel;
+
   return (
-    <View style={styles.productCard}>
+    <Animatable.View
+      animation={isLocked ? "fadeInUp" : "fadeIn"}
+      duration={500}
+      delay={50}
+      style={styles.productCard}
+    >
       <Text style={styles.productName}>{name}</Text>
       <Text style={styles.productDesc}>{description}</Text>
       <Text style={styles.productPrice}>Price: {price} pts</Text>
       <Text style={styles.productStock}>Stock: {stock}</Text>
 
-      <View style={styles.quantityRow}>
-        <TouchableOpacity style={styles.quantityButton} onPress={onDecrease}>
-          <Ionicons name="remove" size={20} color="white" />
-        </TouchableOpacity>
+      {isLocked ? (
+        <Animatable.Text
+          animation="shake"
+          easing="ease-in-out"
+          iterationCount={1}
+          style={{
+            color: "red",
+            fontWeight: "bold",
+            marginTop: 6,
+            fontSize: 14,
+            textAlign: "center",
+          }}
+        >
+          🔒 Requires Level {minLevel}
+        </Animatable.Text>
+      ) : (
+        <View style={styles.quantityRow}>
+          <TouchableOpacity style={styles.quantityButton} onPress={onDecrease}>
+            <Ionicons name="remove" size={20} color="white" />
+          </TouchableOpacity>
 
-        <Text style={styles.qtyText}>{quantity}</Text>
+          <Text style={styles.qtyText}>{quantity}</Text>
 
-        <TouchableOpacity style={styles.quantityButton} onPress={onIncrease}>
-          <Ionicons name="add" size={20} color="white" />
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity
-        style={[styles.addButton, quantity === 0 && styles.disabledButton]}
-        onPress={onAddToCart}
-        disabled={quantity === 0}
-      >
-        <Text style={styles.addButtonText}>Add to Cart {quantity}</Text>
-      </TouchableOpacity>
-    </View>
+          <TouchableOpacity style={styles.quantityButton} onPress={onIncrease}>
+            <Ionicons name="add" size={20} color="white" />
+          </TouchableOpacity>
+        </View>
+      )}
+    </Animatable.View>
   );
 };
 
