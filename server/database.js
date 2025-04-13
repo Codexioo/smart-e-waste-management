@@ -24,6 +24,8 @@ db.serialize(() => {
       password TEXT NOT NULL,
       otp_verified BOOLEAN DEFAULT 0,
       total_reward_points INTEGER DEFAULT 0,
+      cumulative_reward_points INTEGER DEFAULT 0,
+      level INTEGER DEFAULT 1,
       create_date TEXT NOT NULL,
       create_time TEXT NOT NULL,
       profile_image TEXT
