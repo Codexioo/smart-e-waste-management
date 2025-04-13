@@ -14,26 +14,38 @@ exports.checkout = (req, res) => {
     [user_id],
     (err, user) => {
       if (err || !user) {
-        return res.status(404).json({ success: false, message: "User not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
       }
 
       let totalCost = 0;
 
-      const validateStock = items.map(item => new Promise((resolve, reject) => {
-        db.get(`SELECT * FROM products WHERE product_id = ?`, [item.product_id], (err, product) => {
-          if (err || !product) return reject("Product not found");
-          if (item.quantity > product.stock_quantity) return reject(`Not enough stock for ${product.product_name}`);
-          totalCost += item.quantity * product.price;
-          item.product_name = product.product_name;
-          item.price = product.price;
-          resolve();
-        });
-      }));
+      const validateStock = items.map(
+        (item) =>
+          new Promise((resolve, reject) => {
+            db.get(
+              `SELECT * FROM products WHERE product_id = ?`,
+              [item.product_id],
+              (err, product) => {
+                if (err || !product) return reject("Product not found");
+                if (item.quantity > product.stock_quantity)
+                  return reject(`Not enough stock for ${product.product_name}`);
+                totalCost += item.quantity * product.price;
+                item.product_name = product.product_name;
+                item.price = product.price;
+                resolve();
+              }
+            );
+          })
+      );
 
       Promise.all(validateStock)
         .then(() => {
           if (user.total_reward_points < totalCost) {
-            return res.status(400).json({ success: false, message: "Not enough reward points" });
+            return res
+              .status(400)
+              .json({ success: false, message: "Not enough reward points" });
           }
 
           const now = new Date().toISOString();
@@ -43,11 +55,14 @@ exports.checkout = (req, res) => {
              VALUES (?, ?, ?)`,
             [user_id, totalCost, now],
             function (err) {
-              if (err) return res.status(500).json({ success: false, message: "Order insert failed" });
+              if (err)
+                return res
+                  .status(500)
+                  .json({ success: false, message: "Order insert failed" });
 
               const orderId = this.lastID;
 
-              items.forEach(item => {
+              items.forEach((item) => {
                 db.run(
                   `INSERT INTO order_items (order_id, product_id, quantity)
                    VALUES (?, ?, ?)`,
@@ -66,10 +81,11 @@ exports.checkout = (req, res) => {
               );
 
               db.run(
-                `INSERT INTO reward_history (user_id, points, transaction_type, transaction_date)
-                 VALUES (?, ?, 'redeem', ?)`,
-                [user_id, totalCost, now]
+                `INSERT INTO reward_history (user_id, points, transaction_type, transaction_date, source)
+                 VALUES (?, ?, 'redeem', ?, ?)`,
+                [user_id, totalCost, now, 'Shop Purchase']
               );
+              
 
               sendOrderEmail(user.email, items, totalCost)
                 .then(() => res.json({ success: true }))
@@ -80,7 +96,7 @@ exports.checkout = (req, res) => {
             }
           );
         })
-        .catch(err => {
+        .catch((err) => {
           console.error("Checkout validation error:", err);
           return res.status(400).json({ success: false, message: err });
         });
@@ -101,8 +117,8 @@ exports.getOrders = (req, res) => {
      JOIN order_items oi ON o.order_id = oi.order_id
      JOIN products p ON oi.product_id = p.product_id
      WHERE o.user_id = ?
-     GROUP BY o.order_id
-     ORDER BY o.purchase_date DESC`,
+     GROUP BY o.order_id, datetime(o.purchase_date), o.total_points_used
+     ORDER BY datetime(o.purchase_date) DESC`,
     [user_id],
     (err, rows) => {
       if (err) {

@@ -3,39 +3,46 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#f9f9f9",
   },
   container: {
     flex: 1,
     padding: 20,
   },
   title: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "green",
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#333",
     marginBottom: 10,
   },
   totalPoints: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 30,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 6,
   },
   exportBtn: {
-    marginBottom: 12,
-    backgroundColor: "green",
-    padding: 10,
-    borderRadius: 6,
+    backgroundColor: "#4CAF50",
+    paddingVertical: 12,
+    borderRadius: 10,
     alignItems: "center",
+    marginVertical: 10,
   },
   exportText: {
-    color: "white",
-    fontWeight: "bold",
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 15,
   },
   card: {
-    backgroundColor: "#f0fff0",
+    backgroundColor: "#fff",
     borderRadius: 10,
-    padding: 12,
-    marginVertical: 6,
+    padding: 15,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   date: {
     fontSize: 13,
@@ -43,40 +50,41 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   credit: {
-    color: "green",
-    fontWeight: "bold",
+    color: "#4CAF50",
+    fontWeight: "700",
     fontSize: 16,
   },
   redeem: {
-    color: "red",
-    fontWeight: "bold",
+    color: "#F44336",
+    fontWeight: "700",
     fontSize: 16,
   },
-  // ✅ New styles for tab buttons
   tabBarAlt: {
     flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 10,
-    marginBottom: 10,
+    
+    marginVertical: 12,
+    flexWrap: "wrap",
   },
   tabButton: {
     paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 20,
+    paddingHorizontal: 14,
+    borderRadius: 8,
     backgroundColor: "#eee",
-    marginHorizontal: 8,
+    margin: 5,
   },
   activeTab: {
-    backgroundColor: "green",
+    backgroundColor: "#4CAF50",
   },
   tabText: {
     fontSize: 14,
     color: "#333",
-    fontWeight: "500",
+    fontWeight: "600",
   },
   activeTabText: {
     color: "#fff",
   },
+
+  
 });
 
 export default styles;
