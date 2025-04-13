@@ -8,32 +8,57 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    paddingTop: 60,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#333",
-    marginBottom: 10,
+    paddingTop: 40,
   },
   actionsContainer: {
     flexDirection: "row",
-    justifyContent: "flex-end",
-    marginBottom: 20,
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
   },
-  storeButton: {
-    backgroundColor: "#4285F4",
+  cartButton: {
+    backgroundColor: "#4CAF50",
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    justifyContent: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
   },
-  actionText: {
+  cartText: {
     color: "#fff",
-    marginLeft: 8,
     fontWeight: "600",
+    marginLeft: 8,
+  },
+  searchBox: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 12,
+  },
+  filterRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 10,
+    flexWrap: "wrap",
+  },
+  filterButton: {
+    backgroundColor: "#eee",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginHorizontal: 5,
+    marginBottom: 6,
+  },
+  filterButtonActive: {
+    backgroundColor: "green",
+  },
+  filterText: {
+    fontWeight: "600",
+    color: "#333",
+  },
+  filterTextActive: {
+    color: "#fff",
   },
   productCard: {
     backgroundColor: "#fff",
@@ -82,21 +107,6 @@ const styles = StyleSheet.create({
     minWidth: 30,
     textAlign: "center",
     color: "#333",
-  },
-  addButton: {
-    backgroundColor: "#4CAF50",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  disabledButton: {
-    backgroundColor: "#ccc",
-  },
-  addButtonText: {
-    color: "#fff",
-    fontWeight: "600",
   },
 });
 

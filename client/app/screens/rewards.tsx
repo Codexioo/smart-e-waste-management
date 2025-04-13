@@ -24,8 +24,11 @@ type Reward = {
 export default function RewardScreen() {
   const [rewards, setRewards] = useState<{
     totalPoints: number;
+    cumulativePoints: number;
+    level: number;
     history: Reward[];
   } | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState<"credit" | "redeem">("credit");
 
@@ -68,7 +71,7 @@ export default function RewardScreen() {
       alert("No reward history to export");
       return;
     }
-  
+
     const creditRows = rewards.history
       .filter((item) => item.transaction_type === "credit")
       .map(
@@ -76,7 +79,7 @@ export default function RewardScreen() {
           `<tr><td>${formatDate(item.transaction_date)}</td><td>+${item.points}</td></tr>`
       )
       .join("");
-  
+
     const redeemRows = rewards.history
       .filter((item) => item.transaction_type === "redeem")
       .map(
@@ -84,19 +87,21 @@ export default function RewardScreen() {
           `<tr><td>${formatDate(item.transaction_date)}</td><td>-${item.points}</td></tr>`
       )
       .join("");
-  
+
     const html = `
       <html>
         <body style="font-family: Arial; padding: 16px;">
           <h2>Smart E-Waste – Reward History</h2>
           <p><strong>Total Available Points:</strong> ${rewards.totalPoints}</p>
-  
+          <p><strong>Level:</strong> ${rewards.level}</p>
+          <p><strong>Cumulative Points:</strong> ${rewards.cumulativePoints}</p>
+
           <h3>Credited</h3>
           <table border="1" cellpadding="8" cellspacing="0" style="width:100%; margin-bottom: 24px;">
             <tr><th>Date</th><th>Points</th></tr>
             ${creditRows || `<tr><td colspan="2">No credited rewards</td></tr>`}
           </table>
-  
+
           <h3>Redeemed</h3>
           <table border="1" cellpadding="8" cellspacing="0" style="width:100%;">
             <tr><th>Date</th><th>Points</th></tr>
@@ -105,7 +110,7 @@ export default function RewardScreen() {
         </body>
       </html>
     `;
-  
+
     try {
       const result = await Print.printToFileAsync({ html });
       if (!(await Sharing.isAvailableAsync())) {
@@ -116,7 +121,6 @@ export default function RewardScreen() {
       alert("Failed to export PDF");
     }
   };
-  
 
   const renderItem = ({ item }: { item: Reward }) => (
     <RewardHistoryItem
@@ -142,6 +146,9 @@ export default function RewardScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>Reward Dashboard</Text>
         <Text style={styles.totalPoints}>Total Available Points: {rewards?.totalPoints}</Text>
+        <Text style={styles.totalPoints}>
+          Level: {rewards?.level ?? "-"} | Cumulative Points: {rewards?.cumulativePoints ?? "-"}
+        </Text>
 
         <View style={styles.tabBarAlt}>
           <TouchableOpacity
