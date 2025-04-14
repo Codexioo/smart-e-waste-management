@@ -91,9 +91,11 @@ db.serialize(() => {
     CREATE TABLE IF NOT EXISTS products (
       product_id INTEGER PRIMARY KEY AUTOINCREMENT,
       product_name TEXT,
+      product_image TEXT,
       product_desc TEXT,
       price INTEGER,
       stock_quantity INTEGER,
+      status TEXT,
       min_level_required INTEGER DEFAULT 1
     )
   `, (err) => {
