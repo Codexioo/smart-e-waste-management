@@ -8,6 +8,8 @@ import AdminProfile from './pages/adminProfile';
 import Users from './pages/users';
 import './App.css';
 import Header from './components/Header';
+import ProductsPage from './pages/products';
+
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
@@ -35,6 +37,7 @@ const App: React.FC = () => {
           <Route path="/requests" element={<Requests />} />
           <Route path="/profile" element={<AdminProfile />} />
           <Route path="/users" element={<Users />} />
+          <Route path="/products" element={<ProductsPage />} />
         </Routes>
       </Layout>
     </Router>
