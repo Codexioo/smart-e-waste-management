@@ -5,6 +5,12 @@ const adminAuthRoutes = require('./routes/adminAuth');
 const profileRoutes = require('./routes/adminProfile');
 const userRoutes = require('./routes/userRoutes');
 
+//Maleen's routes
+const uploadRoutes = require("./routes/uploadRoutes");
+const productRoutes = require("./routes/productRoutes");
+const path = require("path");
+
+
 const app = express();
 const PORT = 9091;
 
@@ -20,6 +26,12 @@ app.use('/api/admin', adminAuthRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/requests', pickupRoutes);
+
+//Maleen's routes
+app.use("/api/upload", uploadRoutes);
+app.use("/api/products", productRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 
 app.listen(PORT, () => {
   console.log(`🚀 Admin server running at http://localhost:${PORT}`);
