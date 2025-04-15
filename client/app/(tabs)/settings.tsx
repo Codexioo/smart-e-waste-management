@@ -13,7 +13,7 @@ import styles from "../../styles/settingsStyles";
 import { clearStorage } from "@/utils/storage";
 
 const SETTINGS = [
-  { icon: "user", label: "Account", route: "/profile" },
+  { icon: "user", label: "Account", route: "screens/profile" },
   { icon: "shopping-cart", label: "Shop", route: "screens/shop" },
   { icon: "activity", label: "Order History", route: "screens/orders" },
   { icon: "file", label: "Reward History", route: "screens/rewards" },
