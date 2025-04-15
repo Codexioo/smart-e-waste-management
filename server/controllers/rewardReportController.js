@@ -99,4 +99,53 @@ const generateRewardSummaryPDF = (req, res) => {
   });
 };
 
-module.exports = { generateRewardSummaryPDF };
+const getRewardSummaryData = (req, res) => {
+  const userId = req.user.id;
+
+  db.get(
+    `SELECT username, email, telephone, total_reward_points FROM users WHERE id = ?`,
+    [userId],
+    (err, user) => {
+      if (err || !user) {
+        console.error("User fetch error:", err);
+        return res.status(500).json({ error: "Failed to retrieve user" });
+      }
+
+      db.all(
+        `SELECT transaction_type, points, transaction_date FROM reward_history WHERE user_id = ? ORDER BY transaction_date DESC`,
+        [userId],
+        (err, rewardHistory) => {
+          if (err) {
+            console.error("Reward history error:", err);
+            return res.status(500).json({ error: "Failed to retrieve reward history" });
+          }
+
+          db.all(
+            `SELECT waste_type, waste_weight, collection_date FROM waste_collections WHERE user_id = ? ORDER BY collection_date DESC`,
+            [userId],
+            (err, pickupHistory) => {
+              if (err) {
+                console.error("Pickup history error:", err);
+                return res.status(500).json({ error: "Failed to retrieve pickup history" });
+              }
+
+              return res.json({
+                user,
+                rewardHistory,
+                pickupHistory,
+              });
+            }
+          );
+        }
+      );
+    }
+  );
+};
+
+module.exports = {
+  generateRewardSummaryPDF,
+  getRewardSummaryData,
+};
+
+
+
