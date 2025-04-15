@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  ScrollView, 
 } from "react-native";
 import styles from "../../styles/signup.styles";
 import React, { useState } from "react";
@@ -24,6 +25,8 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+
 
   const [selectedRole, setSelectedRole] = useState(null);
   const [roleOpen, setRoleOpen] = useState(false);
@@ -38,6 +41,7 @@ export default function Signup() {
     telephone: "",
     address: "",
     password: "",
+    confirmPassword: "",
     selectedRole: "",
   });
 
@@ -50,6 +54,7 @@ export default function Signup() {
       telephone: "",
       address: "",
       password: "",
+      confirmPassword: "",
       selectedRole: "",
     });
   
@@ -93,6 +98,14 @@ export default function Signup() {
       valid = false;
     }
   
+    if (!confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password.";
+      valid = false;
+    } else if (confirmPassword !== password) {
+      newErrors.confirmPassword = "Passwords do not match.";
+      valid = false;
+    }
+    
     if (!selectedRole) {
       newErrors.selectedRole = "Please select a role.";
       valid = false;
@@ -135,6 +148,10 @@ export default function Signup() {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
+       <ScrollView
+    contentContainerStyle={{ flexGrow: 1 }}
+    keyboardShouldPersistTaps="handled"
+  >
       <View style={styles.container}>
         <View style={styles.card}>
           <View style={styles.header}>
@@ -142,37 +159,37 @@ export default function Signup() {
           </View>
 
           <View style={styles.formContainer}>
-           {/* Role Dropdown */}
-<View style={{ zIndex: roleOpen ? 1000 : 1 }}>
-  <Text style={styles.label}>Select Your Role:</Text>
-  <DropDownPicker
-    open={roleOpen}
-    value={selectedRole}
-    items={roleItems}
-    setOpen={setRoleOpen}
-    setValue={setSelectedRole}
-    setItems={setRoleItems}
-    placeholder="Select a role"
-    style={{
-      backgroundColor: COLORS.inputBackground,
-      borderColor: COLORS.border,
-      borderRadius: 12,
-      zIndex: 100, // Ensures it's above other elements
-    }}
-    dropDownContainerStyle={{
-      borderColor: COLORS.border,
-      borderRadius: 12,
-      zIndex: 1000, // Ensures the dropdown appears above other elements
-      elevation: 10, // Increases shadow effect (Android)
-    }}
-    textStyle={{
-      color: COLORS.textDark,
-    }}
-  />
-  {errors.selectedRole ? (
-    <Text style={styles.errorText}>{errors.selectedRole}</Text>
-  ) : null}
-</View>
+                    {/* Role Dropdown */}
+          <View style={{ zIndex: roleOpen ? 1000 : 1 }}>
+            <Text style={styles.label}>Select Your Role:</Text>
+            <DropDownPicker
+              open={roleOpen}
+              value={selectedRole}
+              items={roleItems}
+              setOpen={setRoleOpen}
+              setValue={setSelectedRole}
+              setItems={setRoleItems}
+              placeholder="Select a role"
+              style={{
+                backgroundColor: COLORS.inputBackground,
+                borderColor: COLORS.border,
+                borderRadius: 12,
+                zIndex: 100, // Ensures it's above other elements
+              }}
+              dropDownContainerStyle={{
+                borderColor: COLORS.border,
+                borderRadius: 12,
+                zIndex: 1000, // Ensures the dropdown appears above other elements
+                elevation: 10, // Increases shadow effect (Android)
+              }}
+              textStyle={{
+                color: COLORS.textDark,
+              }}
+            />
+            {errors.selectedRole ? (
+              <Text style={styles.errorText}>{errors.selectedRole}</Text>
+            ) : null}
+          </View>
 
 
             {/* Username */}
@@ -312,6 +329,33 @@ export default function Signup() {
               ) : null}
             </View>
 
+            {/* Confirm Password */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Confirm Password</Text>
+              <View style={styles.inputContainer}>
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color={COLORS.primary}
+                  style={styles.inputIcon}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="********"
+                  placeholderTextColor={COLORS.placeholderText}
+                  value={confirmPassword}
+                  onChangeText={(text) => {
+                    setConfirmPassword(text);
+                    setErrors({ ...errors, confirmPassword: "" });
+                  }}
+                  secureTextEntry={!showPassword}
+                />
+              </View>
+              {errors.confirmPassword ? (
+                <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+              ) : null}
+            </View>
+
             {/* Sign Up Button */}
             <TouchableOpacity
               style={styles.button}
@@ -338,6 +382,7 @@ export default function Signup() {
           </View>
         </View>
       </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

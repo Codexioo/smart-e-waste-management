@@ -89,23 +89,22 @@ const styles = StyleSheet.create({
     padding:8,
   },
   button: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 12,
     height: 50,
-    justifyContent: "center" as const,
-    alignItems: "center" as const,
-    marginTop: 16,
-    shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 12,
+    marginHorizontal: 1,
+  },  
   buttonText: {
     color: COLORS.white,
     fontSize: 16,
     fontWeight: "600" as const,
-  },
+    textAlign: "center",
+    textAlignVertical: "center", // ensure vertical alignment
+    includeFontPadding: false,   // avoid Android font padding
+    paddingHorizontal: 6,        // small horizontal padding
+    lineHeight: 20,              // consistent line height
+  },  
   footer: {
     flexDirection: "row" as const,
     justifyContent: "center" as const,
@@ -122,9 +121,11 @@ const styles = StyleSheet.create({
 
   buttonContainer: {
     flexDirection: "row",
-    justifyContent: "space-between", // Ensures buttons are spaced evenly
-    marginTop: 15,
-  },
+    justifyContent: "space-evenly", // better for even spacing
+    marginTop: 20,
+    paddingHorizontal: 0,
+    gap: 8,
+  },  
   button2: {
     flex: 1, // Each button takes equal space
     padding: 12,
@@ -180,8 +181,16 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     marginBottom: 10,
+    backgroundColor: "#f0f0f0",
   },
+  imageEditOptions: {
+    alignItems: "center",
+    gap: 6,
+  },
+    
   addImageText: {
     color: COLORS.primary,
     textAlign: "center",

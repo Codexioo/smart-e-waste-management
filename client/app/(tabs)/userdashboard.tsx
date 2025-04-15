@@ -7,13 +7,15 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import axios from "../../api/axiosInstance";
 import useProtectedRoute from "@/hooks/useProtectedRoute";
 import { Feather } from "@expo/vector-icons";
-import * as FileSystem from "expo-file-system";
 import { getUser, getToken } from "@/utils/storage";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 
 export default function UserDashboard() {
   useProtectedRoute();
@@ -29,6 +31,18 @@ export default function UserDashboard() {
     create_date?: string;
     status: string;
   }
+ 
+interface PickupHistory {
+  collection_date: string;
+  waste_type: string;
+  waste_weight: number;
+}
+
+interface RewardItem {
+  transaction_type: "credit" | "redeem";
+  points: number;
+  transaction_date: string;
+}
 
   useEffect(() => {
     const fetchPickupHistory = async () => {
@@ -48,10 +62,10 @@ export default function UserDashboard() {
   const handleDownloadReport = async () => {
     try {
       const token = await getToken();
-      const url = `${axios.defaults.baseURL}/reward-summary`;
-
+      const url = `${axios.defaults.baseURL}/reward-summary-data`;
+  
       if (Platform.OS === "web") {
-        const response = await fetch(url, {
+        const response = await fetch(`${axios.defaults.baseURL}/reward-summary`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -63,19 +77,104 @@ export default function UserDashboard() {
         link.click();
         document.body.removeChild(link);
       } else {
-        const fileUri = FileSystem.documentDirectory + "reward-summary.pdf";
-        const downloadResumable = FileSystem.createDownloadResumable(url, fileUri, {
+        // 📥 Fetch reward data
+        const response = await axios.get("/reward-summary-data", {
           headers: { Authorization: `Bearer ${token}` },
         });
+  
+        const { user, rewardHistory, pickupHistory } = response.data;
+  
+const rewardRows =
+rewardHistory.length > 0
+  ? rewardHistory
+      .map(
+        (item:RewardItem) =>
+          `<tr><td>${item.transaction_date}</td><td>${item.transaction_type}</td><td>${item.points}</td></tr>`
+      )
+      .join("")
+  : "<tr><td colspan='3'>No rewarding points</td></tr>";
 
-        const result = await downloadResumable.downloadAsync();
-        alert(result?.uri ? `✅ Report downloaded to:\n${result.uri}` : "⚠️ Failed to download report.");
+// Format pickup table rows
+const pickupRows =
+pickupHistory.length > 0
+  ? pickupHistory
+      .map(
+        (item:PickupHistory) =>
+          `<tr><td>${item.collection_date}</td><td>${item.waste_type}</td><td>${item.waste_weight} kg</td></tr>`
+      )
+      .join("")
+  : "<tr><td colspan='3'>No pickup records</td></tr>";
+
+// HTML with injected rows
+const html = `
+<html>
+  <body style="font-family: Arial; padding: 20px;">
+    <h2>Smart E-Waste – Reward Summary</h2>
+    <p><strong>Name:</strong> ${user.username}</p>
+    <p><strong>Total Reward Points:</strong> ${user.total_reward_points}</p>
+
+    <h3>Reward History</h3>
+    <table border="1" cellspacing="0" cellpadding="8" style="width:100%;">
+      <tr><th>Date</th><th>Transaction Type</th><th>Points</th></tr>
+      ${rewardRows}
+    </table>
+
+    <h3 style="margin-top:24px;">Pickup History</h3>
+    <table border="1" cellspacing="0" cellpadding="8" style="width:100%;">
+      <tr><th>Date</th><th>Waste Type</th><th>Weight</th></tr>
+      ${pickupRows}
+    </table>
+  </body>
+</html>
+`;
+
+        // 🖨️ Generate PDF
+        const result = await Print.printToFileAsync({ html });
+  
+        // 📤 Share
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(result.uri);
+        } else {
+          Alert.alert("✅ PDF Generated", `Path: ${result.uri}`);
+        }
       }
     } catch (err) {
       console.error("Download error:", err);
-      alert("❌ Error downloading the report.");
+      alert("❌ Error generating the report.");
     }
   };
+
+  // const handleDownloadReport = async () => {
+  //   try {
+  //     const token = await getToken();
+  //     const url = `${axios.defaults.baseURL}/reward-summary`;
+
+  //     if (Platform.OS === "web") {
+  //       const response = await fetch(url, {
+  //         method: "GET",
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       });
+  //       const blob = await response.blob();
+  //       const link = document.createElement("a");
+  //       link.href = window.URL.createObjectURL(blob);
+  //       link.setAttribute("download", "reward-summary.pdf");
+  //       document.body.appendChild(link);
+  //       link.click();
+  //       document.body.removeChild(link);
+  //     } else {
+  //       const fileUri = FileSystem.documentDirectory + "reward-summary.pdf";
+  //       const downloadResumable = FileSystem.createDownloadResumable(url, fileUri, {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       });
+
+  //       const result = await downloadResumable.downloadAsync();
+  //       alert(result?.uri ? `✅ Report downloaded to:\n${result.uri}` : "⚠️ Failed to download report.");
+  //     }
+  //   } catch (err) {
+  //     console.error("Download error:", err);
+  //     alert("❌ Error downloading the report.");
+  //   }
+  // };
 
   const filteredHistory = pickupHistory.filter((item) =>
     item.city.toLowerCase().includes(searchTerm.toLowerCase())
