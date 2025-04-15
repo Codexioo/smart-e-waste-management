@@ -13,8 +13,7 @@ export default function RewardHistoryItem({ date, points, type }: Props) {
     <View style={styles.card}>
       <Text style={styles.date}>{date}</Text>
       <Text style={type === "credit" ? styles.credit : styles.redeem}>
-        {type === "credit" ? "+" : "-"}
-        {points} pts
+        {type === "credit" ? "+" : "-"}{points} pts
       </Text>
     </View>
   );
