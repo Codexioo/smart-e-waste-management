@@ -16,10 +16,12 @@ import NotFound from './pages/NotFound';
 import './App.css';
 import Header from './components/Header';
 import ProtectedRoute from "./components/ProtectedRoute";
+import ProductsPage from './pages/products';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
-  const hideSidebar = location.pathname === '/adminLogin' || location.pathname === '/NotFound';
+  const hideSidebar =
+    location.pathname === '/adminLogin' || location.pathname === '/NotFound';
 
   return (
     <div className="app-layout">
@@ -47,6 +49,7 @@ const App: React.FC = () => {
             <Route path="/requests" element={<Requests />} />
             <Route path="/profile" element={<AdminProfile />} />
             <Route path="/users" element={<Users />} />
+            <Route path="/products" element={<ProductsPage />} />
           </Route>
 
           {/* 404 Not Found - Catch all */}

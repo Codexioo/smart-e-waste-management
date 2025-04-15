@@ -11,7 +11,7 @@ const generateRewardSummaryPDF = (req, res) => {
     }
 
     db.all(`
-      SELECT transaction_type, points, transaction_date
+      SELECT transaction_type, points, transaction_date, source
       FROM reward_history
       WHERE user_id = ?
       ORDER BY transaction_date DESC
@@ -71,7 +71,7 @@ const generateRewardSummaryPDF = (req, res) => {
             doc
               .fontSize(12)
               .fillColor('black')
-              .text(`${i + 1}. ${r.transaction_type.toUpperCase()} - ${r.points} pts on ${r.transaction_date}`);
+              .text(`${i + 1}. ${r.transaction_type.toUpperCase()} - ${r.points} pts on ${r.transaction_date} (${r.source || "N/A"})`);
           });
         }
 
