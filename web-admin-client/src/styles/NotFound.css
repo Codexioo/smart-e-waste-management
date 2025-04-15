@@ -1,0 +1,25 @@
+.not-found-page {
+    text-align: center;
+    padding: 80px;
+  }
+  
+  .not-found-page h1 {
+    font-size: 36px;
+    margin-bottom: 16px;
+  }
+  
+  .not-found-page p {
+    font-size: 18px;
+    color: gray;
+    margin-bottom: 24px;
+  }
+  
+  .not-found-page button {
+    padding: 10px 20px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  

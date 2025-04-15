@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "../api/axiosInstance";
 import "../styles/adminProfile.css"; // Create this for styling
 import { useNavigate } from "react-router-dom";
+import defaultAvatar from "../user.png";
 
 const AdminProfile = () => {
   const [username, setUsername] = useState("");
@@ -43,7 +44,7 @@ const AdminProfile = () => {
       const token = localStorage.getItem("adminToken");
       await axios.put(
         "/profile",
-        { username, telephone, address, profile_image: profileImage },
+        { username, telephone, address, email, profile_image: profileImage },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -96,27 +97,41 @@ const AdminProfile = () => {
   return (
     <div className="admin-profile-wrapper">
       <h2 className="admin-profile-title">Admin Profile</h2>
-
       <div className="image-section">
-  {profileImage ? (
-    <>
-      <img src={profileImage} alt="Profile" className="admin-avatar-preview" />
-      {isEditing && (
-        <button onClick={() => setProfileImage("")}>Remove Image</button>
+  <img
+    src={profileImage || defaultAvatar}
+    alt="Profile"
+    className="admin-avatar-preview"
+  />
+
+  {isEditing && (
+    <div className="image-edit-buttons">
+      <input
+        type="file"
+        accept="image/*"
+        id="imageUpload"
+        style={{ display: "none" }}
+        onChange={handleImageUpload}
+      />
+      <label htmlFor="imageUpload" className="upload-btn">
+        {profileImage ? "Change Image" : "Add Profile Image"}
+      </label>
+
+      {profileImage && (
+        <button className="remove-btn" onClick={() => setProfileImage("")}>
+          Remove Image
+        </button>
       )}
-    </>
-  ) : (
-    isEditing && (
-      <input type="file" accept="image/*" onChange={handleImageUpload} />
-    )
+    </div>
   )}
 </div>
+
 
       <label className="admin-label">Username</label>
       <input value={username} onChange={e => setUsername(e.target.value)} disabled={!isEditing} />
 
       <label className="admin-label">Email</label>
-      <input value={email} disabled />
+      <input value={email} onChange={e => setEmail(e.target.value)} disabled={!isEditing} />
 
       <label className="admin-label">Telephone</label>
       <input value={telephone} onChange={e => setTelephone(e.target.value)} disabled={!isEditing} />
