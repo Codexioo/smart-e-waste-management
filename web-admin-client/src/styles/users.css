@@ -1,0 +1,173 @@
+.admin-requests {
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    margin: 20px;
+  }
+  
+  .page-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  
+  .filters {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  
+  .filters input,
+  .filters select {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+  
+  .reset-btn {
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .request-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .request-table th,
+  .request-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    font-size: 14px;
+  }
+  
+  .badge {
+    padding: 5px 10px;
+    border-radius: 6px;
+    text-transform: capitalize;
+    font-weight: 600;
+  }
+  
+  .badge.pending {
+    background-color: #ffe58f;
+    color: #8c6d1f;
+  }
+  
+  .badge.accepted {
+    background-color: #dff0d8;
+    color: #3c763d;
+  }
+  
+  .badge.rejected {
+    background-color: #f2dede;
+    color: #a94442;
+  }
+  
+  .view-btn {
+    background-color: #2ecc71;
+    color: white;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  
+  .modal {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 90%;
+    box-sizing: border-box; /* ensure width includes padding */
+  }
+  
+  .modal-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  
+  .modal input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #9acbaf; /* green border */
+    border-radius: 8px;
+    background-color: #f6fff7; /* light greenish-white background */
+    font-size: 14px;
+    margin-bottom: 12px;
+    transition: border-color 0.3s;
+    box-sizing: border-box; /* add this line */
+  }
+  
+  .modal input:focus {
+    outline: none;
+    border-color: #219150; /* darker green on focus */
+    box-shadow: 0 0 0 2px rgba(39, 174, 96, 0.2); /* subtle green glow */
+  }
+  
+  .readonly-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    background-color: #f6f6f6;
+    font-size: 14px;
+    margin-bottom: 12px;
+    color: #333;
+  }
+  
+  .button-group {
+    display: flex;
+    gap: 10px; /* space between buttons */
+  }
+  
+  .display-btn,
+  .edit-btn,
+  .delete-btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  
+  /* Optional: Keep specific colors */
+  .display-btn {
+    background-color: #27ae60;
+    color: white;
+  }
+  
+  .edit-btn {
+    background-color: #2ecc71;
+    color: white;
+  }
+  
+  .delete-btn {
+    background-color: #e74c3c;
+    color: white;
+  }
+  
