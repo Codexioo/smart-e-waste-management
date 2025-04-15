@@ -39,16 +39,16 @@ router.get('/', authenticate, (req, res) => {
 
 // PUT /api/profile
 router.put('/', authenticate, (req, res) => {
-  const { username, telephone, address, profile_image  } = req.body;
+  const { username, telephone, address, email, profile_image  } = req.body;
   const adminId = req.user.id;
 
-  if (!username || !telephone || !address) {
+  if (!username || !telephone || !address || !email) {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
   db.run(
-    `UPDATE users SET username = ?, telephone = ?, address = ?, profile_image =? WHERE id = ? AND role = 'admin'`,
-    [username, telephone, address, profile_image, adminId],
+    `UPDATE users SET username = ?, telephone = ?, address = ?, email = ?, profile_image =? WHERE id = ? AND role = 'admin'`,
+    [username, telephone, address, email, profile_image, adminId],
     function (err) {
       if (err) return res.status(500).json({ error: 'Failed to update admin profile' });
       res.json({ message: 'Profile updated' });

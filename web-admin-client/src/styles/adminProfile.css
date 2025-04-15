@@ -57,14 +57,42 @@
     opacity: 0.9;
   }
 
+  .image-section {
+    margin: 10px 0;
+  }
+
   .admin-avatar-preview {
     width: 100px;
     height: 100px;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid #ccc;
+    margin-bottom: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
   }
-  .image-section {
-    margin: 10px 0;
+  
+  
+  .image-edit-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
   }
+  
+  .upload-btn {
+    color: #2a6fdb;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  
+  .remove-btn {
+    background-color: transparent;
+    color: red;
+    border: none;
+    cursor: pointer;
+  }
+  
   
   
