@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  Image,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -22,12 +23,14 @@ import { getRewards } from "../../services/rewardsService";
 import { checkout } from "../../services/ordersService";
 import { useRouter } from "expo-router";
 import BottomBar from "../../components/bottombar";
+import { formatImageUrl } from "../../utils/formatImage";
 
 type CartItem = {
   product_id: number;
   product_name: string;
   price: number;
   quantity: number;
+  product_image?: string;
 };
 
 export default function CartScreen() {
@@ -63,28 +66,34 @@ export default function CartScreen() {
   };
 
   const confirmClearCart = () => {
-    Alert.alert("Clear All?", "Are you sure you want to remove all items from your cart?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Yes, Clear",
-        style: "destructive",
-        onPress: async () => {
-          await clearCartAPI();
-          setCartItems([]);
-          setTotalPoints(0);
-          Toast.show({
-            type: "success",
-            text1: "Cart cleared",
-          });
-          setTimeout(() => {
-            router.push("/screens/shop");
-          }, 500);
+    Alert.alert(
+      "Clear All?",
+      "Are you sure you want to remove all items from your cart?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Yes, Clear",
+          style: "destructive",
+          onPress: async () => {
+            await clearCartAPI();
+            setCartItems([]);
+            setTotalPoints(0);
+            Toast.show({
+              type: "success",
+              text1: "Cart cleared",
+            });
+            setTimeout(() => {
+              router.push("/screens/shop");
+            }, 500);
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
-  const handleCheckout = () => {
+  const [checkingOut, setCheckingOut] = useState(false);
+
+const handleCheckout = () => {
     if (totalPoints > userPoints) {
       Toast.show({
         type: "error",
@@ -94,50 +103,56 @@ export default function CartScreen() {
       return;
     }
 
-    Alert.alert("Confirm Checkout", `Spend ${totalPoints} points to place your order?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Yes, Place Order",
-        style: "default",
-        onPress: async () => {
-          try {
-            const res = await checkout(cartItems);
-            if (res.success) {
-              await clearCartAPI();
-              setCartItems([]);
-              setTotalPoints(0);
+    Alert.alert(
+      "Confirm Checkout",
+      `Spend ${totalPoints} points to place your order?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Yes, Place Order",
+          style: "default",
+          onPress: async () => {
+            try {
+              const res = await checkout(cartItems);
+              if (res.success) {
+                setCartItems([]);
+                setTotalPoints(0);
 
-              Toast.show({
-                type: "success",
-                text1: "✅ Order placed successfully!",
-                text2: "Redirecting to shop...",
-              });
+                Toast.show({
+                  type: "success",
+                  text1: "✅ Order placed successfully!",
+                  text2: "Redirecting to shop...",
+                });
 
-              setTimeout(() => {
-                router.push("/screens/shop");
-              }, 500);
-            } else {
+                setTimeout(() => {
+                  router.push("/screens/shop");
+                }, 1000);
+                
+              } else {
+                Toast.show({
+                  type: "error",
+                  text1: "Checkout failed",
+                  text2: res.message || "Something went wrong.",
+                });
+              }
+            } catch {
               Toast.show({
                 type: "error",
-                text1: "Checkout failed",
-                text2: res.message || "Something went wrong.",
+                text1: "Network error",
+                text2: "Please try again.",
               });
             }
-          } catch {
-            Toast.show({
-              type: "error",
-              text1: "Network error",
-              text2: "Please try again.",
-            });
-          }
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
   const handleRemove = async (productId: number) => {
     await removeFromCart(productId);
-    const updatedCart = cartItems.filter((item) => item.product_id !== productId);
+    const updatedCart = cartItems.filter(
+      (item) => item.product_id !== productId
+    );
     setCartItems(updatedCart);
     calculateTotal(updatedCart);
   };
@@ -149,7 +164,9 @@ export default function CartScreen() {
     try {
       await addToCart(item.product_id, newQuantity);
       const updatedCart = cartItems.map((ci) =>
-        ci.product_id === item.product_id ? { ...ci, quantity: newQuantity } : ci
+        ci.product_id === item.product_id
+          ? { ...ci, quantity: newQuantity }
+          : ci
       );
       setCartItems(updatedCart);
       calculateTotal(updatedCart);
@@ -169,8 +186,22 @@ export default function CartScreen() {
 
   const renderItem = ({ item }: { item: CartItem }) => (
     <View style={styles.productCard}>
+      {item.product_image && (
+        <Image
+          source={{ uri: formatImageUrl(item.product_image) }} // ✅ apply here
+          style={{
+            width: "100%",
+            height: 140,
+            borderRadius: 10,
+            marginBottom: 10,
+          }}
+          resizeMode="cover"
+        />
+      )}
       <Text style={styles.productName}>{item.product_name}</Text>
-      <Text style={styles.productPrice}>Total: {item.quantity * item.price} pts</Text>
+      <Text style={styles.productPrice}>
+        Total: {item.quantity * item.price} pts
+      </Text>
 
       <View style={styles.quantityRow}>
         <View style={styles.inlineQuantityControls}>
@@ -191,7 +222,10 @@ export default function CartScreen() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.removeButton} onPress={() => handleRemove(item.product_id)}>
+        <TouchableOpacity
+          style={styles.removeButton}
+          onPress={() => handleRemove(item.product_id)}
+        >
           <Text style={styles.removeText}>Remove</Text>
         </TouchableOpacity>
       </View>
@@ -224,22 +258,29 @@ export default function CartScreen() {
           />
 
           <View style={styles.summary}>
-            <Text style={styles.total}>Total Points Required: {totalPoints}</Text>
-            <Text style={styles.total}>Your Available Points: {userPoints}</Text>
+            <Text style={styles.total}>
+              Total Points Required: {totalPoints}
+            </Text>
+            <Text style={styles.total}>
+              Your Available Points: {userPoints}
+            </Text>
 
             <View style={styles.actionsRow}>
               <TouchableOpacity
                 style={[
                   styles.checkoutButton,
-                  totalPoints > userPoints && styles.disabledButton,
+                  (totalPoints > userPoints || checkingOut) && styles.disabledButton,
                 ]}
                 onPress={handleCheckout}
                 disabled={totalPoints > userPoints}
               >
-                <Text style={styles.checkoutText}>Checkout</Text>
+                <Text style={styles.checkoutText}>{checkingOut ? "Processing..." : "Checkout"}</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.clearButton} onPress={confirmClearCart}>
+              <TouchableOpacity
+                style={styles.clearButton}
+                onPress={confirmClearCart}
+              >
                 <Text style={styles.clearText}>Clear All</Text>
               </TouchableOpacity>
             </View>

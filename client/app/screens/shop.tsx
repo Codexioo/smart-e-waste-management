@@ -19,23 +19,35 @@ import { addToCart as apiAddToCart } from "../../services/cartService";
 import Toast from "react-native-toast-message";
 import BottomBar from "../../components/bottombar";
 import { Feather } from "@expo/vector-icons";
+import { formatImageUrl } from "../../utils/formatImage";
 
 type Product = {
   product_id: number;
   product_name: string;
   product_desc: string;
+  product_image?: string;
   price: number;
   stock_quantity: number;
-  min_level_required: number;
+  status: string;
+  min_level_required: string; // ✅ already a string
 };
 
 type SortOption = "priceLow" | "priceHigh" | "level" | "stock";
+
+const levelRank = [
+  "Bronze I", "Bronze II",
+  "Silver I", "Silver II",
+  "Gold I", "Gold II",
+  "Platinum I", "Platinum II",
+  "Diamond", "Eco Legend"
+];
 
 export default function ShopScreen() {
   const [products, setProducts] = useState<Product[]>([]);
   const [quantities, setQuantities] = useState<{ [key: number]: number }>({});
   const [loading, setLoading] = useState(true);
-  const [userLevel, setUserLevel] = useState<number>(1);
+  const [userLevel, setUserLevel] = useState<string>("Bronze I");
+
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "locked" | "unlocked">("all");
   const [sort, setSort] = useState<SortOption>("priceLow");
@@ -79,7 +91,9 @@ export default function ShopScreen() {
   };
 
   const selectedItems = products
-    .filter((p) => userLevel >= p.min_level_required)
+   
+.filter((p) => p.status !== "Not Available")
+
     .filter((p) => quantities[p.product_id] > 0)
     .map((p) => ({
       product_id: p.product_id,
@@ -107,9 +121,15 @@ export default function ShopScreen() {
   };
 
   const filteredSortedProducts = products
+    .filter((p) =>
+      p.status !== "Not Available")
     .filter((p) => {
-      const nameMatch = p.product_name.toLowerCase().includes(search.toLowerCase());
-      const isLocked = userLevel < p.min_level_required;
+      const nameMatch = p.product_name
+        .toLowerCase()
+        .includes(search.toLowerCase());
+
+      const isLocked =
+        levelRank.indexOf(userLevel) < levelRank.indexOf(p.min_level_required);
 
       if (!nameMatch) return false;
       if (filter === "locked") return isLocked;
@@ -125,7 +145,10 @@ export default function ShopScreen() {
         case "stock":
           return b.stock_quantity - a.stock_quantity;
         case "level":
-          return a.min_level_required - b.min_level_required;
+          return (
+            levelRank.indexOf(a.min_level_required) -
+            levelRank.indexOf(b.min_level_required)
+          );
         default:
           return 0;
       }
@@ -139,11 +162,16 @@ export default function ShopScreen() {
       stock={item.stock_quantity}
       quantity={quantities[item.product_id] || 0}
       onIncrease={() => updateQuantity(item.product_id, 1, item.stock_quantity)}
-      onDecrease={() => updateQuantity(item.product_id, -1, item.stock_quantity)}
+      onDecrease={() =>
+        updateQuantity(item.product_id, -1, item.stock_quantity)
+      }
       userLevel={userLevel}
-      minLevel={item.min_level_required}
+      minLevel={item.min_level_required} // ✅ directly use string
+      image={formatImageUrl(item.product_image)}
+      status={item.status}
     />
   );
+
 
   if (loading) {
     return (
@@ -161,7 +189,10 @@ export default function ShopScreen() {
           <Text style={{ fontSize: 20, fontWeight: "700", color: "#333" }}>
             Shop
           </Text>
-          <TouchableOpacity style={styles.cartButton} onPress={() => router.push("/screens/cart")}>
+          <TouchableOpacity
+            style={styles.cartButton}
+            onPress={() => router.push("/screens/cart")}
+          >
             <Feather name="shopping-cart" size={18} color="#fff" />
             <Text style={styles.cartText}>Cart</Text>
           </TouchableOpacity>
@@ -228,7 +259,9 @@ export default function ShopScreen() {
 
         {/* Product List */}
         {filteredSortedProducts.length === 0 ? (
-          <Text style={{ textAlign: "center", marginTop: 20 }}>No products found.</Text>
+          <Text style={{ textAlign: "center", marginTop: 20 }}>
+            No products found.
+          </Text>
         ) : (
           <FlatList
             data={filteredSortedProducts}
@@ -253,7 +286,9 @@ export default function ShopScreen() {
             elevation: 4,
           }}
         >
-          <Text style={{ fontWeight: "bold", marginBottom: 4 }}>Selected Items:</Text>
+          <Text style={{ fontWeight: "bold", marginBottom: 4 }}>
+            Selected Items:
+          </Text>
           {selectedItems.map((item) => (
             <Text key={item.product_id}>
               • {item.product_name} x {item.quantity}
@@ -264,13 +299,20 @@ export default function ShopScreen() {
             {selectedItems.reduce(
               (sum, item) =>
                 sum +
-                (products.find((p) => p.product_id === item.product_id)?.price || 0) *
+                (products.find((p) => p.product_id === item.product_id)
+                  ?.price || 0) *
                   item.quantity,
               0
             )}
           </Text>
 
-          <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 10 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginTop: 10,
+            }}
+          >
             <TouchableOpacity
               onPress={handleBatchAddToCart}
               style={{
@@ -282,7 +324,9 @@ export default function ShopScreen() {
                 alignItems: "center",
               }}
             >
-              <Text style={{ color: "#fff", fontWeight: "bold" }}>Add to Cart</Text>
+              <Text style={{ color: "#fff", fontWeight: "bold" }}>
+                Add to Cart
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity

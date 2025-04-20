@@ -58,6 +58,11 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
   },
+
+  disabledButton: {
+    backgroundColor: "#aaa", // a grayed-out color
+  },
+  
 });
 
 export default styles;

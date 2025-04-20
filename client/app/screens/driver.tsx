@@ -26,6 +26,8 @@ export default function DriverScreen() {
   const [userInfo, setUserInfo] = useState<any>(null);
   const [wasteType, setWasteType] = useState("");
   const [wasteWeight, setWasteWeight] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+
 
   const validateEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
   const validateOtp = (otp: string) => /^\d{6}$/.test(otp);
@@ -34,14 +36,15 @@ export default function DriverScreen() {
     if (!email || !validateEmail(email)) {
       return Alert.alert("Please enter a valid email");
     }
-
+  
     try {
+      setOtpLoading(true); // ⏳ Show loading
       const res = await checkUser(email);
       if (!res.success) {
         return Alert.alert(res.message || "Email not registered");
       }
       setUserInfo(res.user);
-
+  
       const otpRes = await sendOtp(email);
       if (otpRes.success) {
         setOtpSent(true);
@@ -54,8 +57,11 @@ export default function DriverScreen() {
         error.response?.data?.message ||
         (error.response?.status === 400 ? "Invalid OTP" : "Network error");
       Alert.alert(message);
+    } finally {
+      setOtpLoading(false); // ✅ hide loading
     }
   };
+  
 
   const handleVerifyOtp = async () => {
     if (!otp || !validateOtp(otp)) {
@@ -68,7 +74,7 @@ export default function DriverScreen() {
         setOtpVerified(true);
         Alert.alert("OTP verified!");
       } else {
-        Alert.alert(res.message || "Invalid OTP");
+        Alert.alert("Invalid OTP");
       }
     } catch {
       Alert.alert("Network error");
@@ -130,9 +136,16 @@ export default function DriverScreen() {
         )}
 
         {!otpSent && (
-          <TouchableOpacity style={styles.button} onPress={handleSendOtp}>
-            <Text style={styles.buttonText}>Send OTP</Text>
-          </TouchableOpacity>
+          <TouchableOpacity
+          style={[styles.button, otpLoading && styles.disabledButton]}
+          onPress={handleSendOtp}
+          disabled={otpLoading}
+        >
+          <Text style={styles.buttonText}>
+            {otpLoading ? "Sending OTP..." : "Send OTP"}
+          </Text>
+        </TouchableOpacity>
+        
         )}
 
         {otpSent && !otpVerified && (
