@@ -1,9 +1,21 @@
+const levels = [
+  { name: "Bronze I", minPoints: 0 },
+  { name: "Bronze II", minPoints: 200 },
+  { name: "Silver I", minPoints: 500 },
+  { name: "Silver II", minPoints: 1000 },
+  { name: "Gold I", minPoints: 1500 },
+  { name: "Gold II", minPoints: 2000 },
+  { name: "Platinum I", minPoints: 3000 },
+  { name: "Platinum II", minPoints: 4000 },
+  { name: "Diamond", minPoints: 5000 },
+  { name: "Eco Legend", minPoints: 7000 },
+];
+
 function getLevelFromPoints(points) {
-  const thresholds = [0, 100, 250, 450, 700, 1100, 1600, 2200, 2900, 3700];
-  for (let i = thresholds.length - 1; i >= 0; i--) {
-    if (points >= thresholds[i]) return i + 1;
+  for (let i = levels.length - 1; i >= 0; i--) {
+    if (points >= levels[i].minPoints) return levels[i].name;
   }
-  return 1;
+  return levels[0].name;
 }
 
 module.exports = { getLevelFromPoints };
