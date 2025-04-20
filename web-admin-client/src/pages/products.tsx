@@ -14,7 +14,7 @@ export default function ProductsPage() {
     price: "",
     stock_quantity: "",
     min_level_required: "",
-    product_image: ""
+    product_image: "",
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
@@ -69,7 +69,7 @@ export default function ProductsPage() {
       price: "",
       stock_quantity: "",
       min_level_required: "",
-      product_image: ""
+      product_image: "",
     });
     setImageFile(null);
     setPreviewUrl("");
@@ -84,7 +84,7 @@ export default function ProductsPage() {
       price: p.price,
       stock_quantity: p.stock_quantity,
       min_level_required: p.min_level_required,
-      product_image: p.product_image
+      product_image: p.product_image,
     });
     setPreviewUrl(p.product_image);
     setImageFile(null);
@@ -100,7 +100,8 @@ export default function ProductsPage() {
       product_image: image,
       price: parseFloat(form.price),
       stock_quantity: parseInt(form.stock_quantity),
-      min_level_required: parseInt(form.min_level_required)
+      min_level_required: form.min_level_required
+
     };
 
     if (editProduct) {
@@ -140,14 +141,21 @@ export default function ProductsPage() {
           value={search}
           onChange={(e) => filter(e.target.value)}
         />
-        <button className="btn-approve" onClick={openAdd}>Add Product
+        <button className="btn-approve" onClick={openAdd}>
+          Add Product
         </button>
       </div>
 
       <table className="request-table">
         <thead>
           <tr>
-            <th>Image</th><th>Name</th><th>Price</th><th>Stock</th><th>Level</th><th>Status</th><th>Actions</th>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Level</th>
+            <th>Status</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -177,8 +185,12 @@ export default function ProductsPage() {
                 </select>
               </td>
               <td>
-                <button className="btn-approve" onClick={() => openEdit(p)}>Edit</button>
-                <button className="btn-reject" onClick={() => deleteProduct(p)}>Delete</button>
+                <button className="btn-approve" onClick={() => openEdit(p)}>
+                  Edit
+                </button>
+                <button className="btn-reject" onClick={() => deleteProduct(p)}>
+                  Delete
+                </button>
               </td>
             </tr>
           ))}
@@ -191,19 +203,71 @@ export default function ProductsPage() {
             <h3>{editProduct ? "Edit Product" : "Add Product"}</h3>
             <form onSubmit={handleSubmit}>
               <label>Product Name</label>
-              <input name="product_name" value={form.product_name} onChange={handleChange} required />
+              <input
+                name="product_name"
+                value={form.product_name}
+                onChange={handleChange}
+                required
+              />
 
               <label>Description</label>
-              <textarea name="product_desc" value={form.product_desc} onChange={handleChange} />
+              <textarea
+                name="product_desc"
+                value={form.product_desc}
+                onChange={handleChange}
+              />
 
               <label>Price</label>
-              <input name="price" type="number" value={form.price} onChange={handleChange} required />
+              <input
+                name="price"
+                type="number"
+                value={form.price}
+                onChange={handleChange}
+                required
+              />
 
               <label>Stock Quantity</label>
-              <input name="stock_quantity" type="number" value={form.stock_quantity} onChange={handleChange} required />
+              <input
+                name="stock_quantity"
+                type="number"
+                value={form.stock_quantity}
+                onChange={handleChange}
+                required
+              />
 
               <label>Minimum Level Required</label>
-              <input name="min_level_required" type="number" value={form.min_level_required} onChange={handleChange} required />
+              <select
+                name="min_level_required"
+                value={form.min_level_required}
+                onChange={handleChange}
+                required
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  fontSize: "14px",
+                  marginTop: "5px",
+                  borderRadius: "12px",
+                  border: "1px solid #ccc",
+                }}
+              >
+                <option value="">Select Level</option>
+                {[
+                  "Bronze I",
+                  "Bronze II",
+                  "Silver I",
+                  "Silver II",
+                  "Gold I",
+                  "Gold II",
+                  "Platinum I",
+                  "Platinum II",
+                  "Diamond",
+                  "Eco Legend",
+                ].map((level) => (
+                  <option key={level} value={level}>
+                    {level}
+                  </option>
+                ))}
+              </select>
 
               <label>Image</label>
               <input type="file" accept="image/*" onChange={handleImage} />
@@ -213,7 +277,11 @@ export default function ProductsPage() {
                 <button type="submit" className="btn-approve">
                   {editProduct ? "Update" : "Add"}
                 </button>
-                <button type="button" className="btn-reject" onClick={closePopup}>
+                <button
+                  type="button"
+                  className="btn-reject"
+                  onClick={closePopup}
+                >
                   Cancel
                 </button>
               </div>
@@ -223,7 +291,10 @@ export default function ProductsPage() {
       )}
 
       {previewImage && (
-        <div className="image-preview-modal" onClick={() => setPreviewImage("")}>
+        <div
+          className="image-preview-modal"
+          onClick={() => setPreviewImage("")}
+        >
           <img src={previewImage} alt="full" />
         </div>
       )}
