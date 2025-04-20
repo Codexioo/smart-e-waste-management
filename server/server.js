@@ -15,6 +15,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const productRoutes = require('./routes/productRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const wasteRoutes = require('./routes/wasteRoutes');
+const path = require("path");
 
 const app = express();
 const PORT = 3001;
@@ -40,6 +41,8 @@ app.use('/', orderRoutes);
 app.use('/', productRoutes);
 app.use('/', cartRoutes);
 app.use('/', wasteRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "../web-admin-server/uploads")));
+
 
 // Start Server
 app.listen(PORT, () => {
