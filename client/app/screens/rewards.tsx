@@ -19,6 +19,7 @@ type Reward = {
   transaction_type: "credit" | "redeem";
   points: number;
   transaction_date: string;
+  source?: string;
 };
 
 export default function RewardScreen() {
@@ -71,46 +72,85 @@ export default function RewardScreen() {
       alert("No reward history to export");
       return;
     }
-
+  
     const creditRows = rewards.history
       .filter((item) => item.transaction_type === "credit")
       .map(
         (item) =>
-          `<tr><td>${formatDate(item.transaction_date)}</td><td>+${item.points}</td></tr>`
+          `<tr><td>${formatDate(item.transaction_date)}</td><td style="color:green;">+${item.points}</td><td>${item.source || "-"}</td></tr>`
       )
       .join("");
-
+  
     const redeemRows = rewards.history
       .filter((item) => item.transaction_type === "redeem")
       .map(
         (item) =>
-          `<tr><td>${formatDate(item.transaction_date)}</td><td>-${item.points}</td></tr>`
+          `<tr><td>${formatDate(item.transaction_date)}</td><td style="color:red;">-${item.points}</td><td>${item.source || "-"}</td></tr>`
       )
       .join("");
-
+  
     const html = `
       <html>
-        <body style="font-family: Arial; padding: 16px;">
-          <h2>Smart E-Waste – Reward History</h2>
-          <p><strong>Total Available Points:</strong> ${rewards.totalPoints}</p>
-          <p><strong>Level:</strong> ${rewards.level}</p>
-          <p><strong>Cumulative Points:</strong> ${rewards.cumulativePoints}</p>
-
-          <h3>Credited</h3>
-          <table border="1" cellpadding="8" cellspacing="0" style="width:100%; margin-bottom: 24px;">
-            <tr><th>Date</th><th>Points</th></tr>
-            ${creditRows || `<tr><td colspan="2">No credited rewards</td></tr>`}
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 24px;
+              color: #222;
+            }
+            h2 {
+              text-align: center;
+              margin-bottom: 30px;
+              color: #006400;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 30px;
+            }
+            th, td {
+              border: 1px solid #ccc;
+              padding: 10px;
+              text-align: left;
+            }
+            thead {
+              background-color: #f0f0f0;
+            }
+          </style>
+        </head>
+        <body>
+          <h2>♻️ Smart E-Waste – Reward Points Report</h2>
+  
+          <h3>Summary</h3>
+          <table>
+            <tr><td><strong>Total Available Points</strong></td><td>${rewards.totalPoints}</td></tr>
+            <tr><td><strong>User Level</strong></td><td>${rewards.level}</td></tr>
+            <tr><td><strong>Cumulative Points</strong></td><td>${rewards.cumulativePoints}</td></tr>
           </table>
-
-          <h3>Redeemed</h3>
-          <table border="1" cellpadding="8" cellspacing="0" style="width:100%;">
-            <tr><th>Date</th><th>Points</th></tr>
-            ${redeemRows || `<tr><td colspan="2">No redeemed rewards</td></tr>`}
+  
+          <h3 style="color:green;">Credited Transactions</h3>
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Points</th><th>Source</th></tr>
+            </thead>
+            <tbody>
+              ${creditRows || `<tr><td colspan="3">No credited rewards found</td></tr>`}
+            </tbody>
+          </table>
+  
+          <h3 style="color:red;">Redeemed Transactions</h3>
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Points</th><th>Source</th></tr>
+            </thead>
+            <tbody>
+              ${redeemRows || `<tr><td colspan="3">No redeemed rewards found</td></tr>`}
+            </tbody>
           </table>
         </body>
       </html>
     `;
-
+  
     try {
       const result = await Print.printToFileAsync({ html });
       if (!(await Sharing.isAvailableAsync())) {
@@ -121,6 +161,7 @@ export default function RewardScreen() {
       alert("Failed to export PDF");
     }
   };
+  
 
   const renderItem = ({ item }: { item: Reward }) => (
     <RewardHistoryItem

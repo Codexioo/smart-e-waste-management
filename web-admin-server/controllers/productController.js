@@ -108,8 +108,22 @@ const updateProduct = (req, res) => {
   );
 };
 
+const deleteProduct = (req, res) => {
+  const productId = req.params.id;
+
+  db.run(`DELETE FROM products WHERE product_id = ?`, [productId], function (err) {
+    if (err) {
+      console.error("Delete failed:", err);
+      return res.status(500).json({ success: false, message: "Delete failed" });
+    }
+    res.json({ success: true });
+  });
+};
+
+
 module.exports = {
   addProduct,
   getAllProducts,
   updateProduct,
+  deleteProduct,
 };

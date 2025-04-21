@@ -22,6 +22,7 @@ import Animated, { Layout } from "react-native-reanimated";
 type OrderItem = {
   product_name: string;
   quantity: number;
+  product_image?: string;
 };
 
 type Order = {
@@ -29,6 +30,7 @@ type Order = {
   purchase_date: string;
   total_points_used: number;
   items: OrderItem[];
+  invoice_number?: string;
 };
 
 type GroupedOrders = {
@@ -63,12 +65,6 @@ export default function OrdersScreen() {
     try {
       const res = await getOrders();
       if (res.success) {
-        console.log("✅ Fetched Orders:", res.orders.length);
-        res.orders.forEach((o: Order) =>
-          console.log(`🧾 Order ID: ${o.order_id} → ${o.purchase_date}`)
-        );
-        
-
         setOrders(res.orders);
         setFilteredOrders(res.orders);
         groupAndSortOrders(res.orders);
@@ -131,14 +127,8 @@ export default function OrdersScreen() {
       .sort(([a], [b]) => new Date(`${b}-01`).getTime() - new Date(`${a}-01`).getTime())
       .map(([_, group], i) => ({
         ...group,
-        collapsed: false, // expand the most recent month
+        collapsed: false,
       }));
-
-    console.log("==== Grouping Debug ====");
-    Object.entries(monthMap).forEach(([key, group]) => {
-      console.log(`${key} (${group.title}) → ${group.data.length} orders`);
-    });
-    console.log("Full groups array:", groups);
 
     setGroupedOrders(groups);
   };
@@ -157,13 +147,14 @@ export default function OrdersScreen() {
       g.title === title ? { ...g, collapsed: !g.collapsed } : g
     );
     setGroupedOrders(updated);
-  };
+};  
 
   const renderOrder = ({ item }: { item: Order }) => (
     <OrderCard
       date={format(new Date(item.purchase_date), "dd MMM yyyy, h:mm a")}
       totalPoints={item.total_points_used}
       items={item.items}
+      invoiceNumber={item.invoice_number}
     />
   );
 
@@ -173,7 +164,7 @@ export default function OrdersScreen() {
       style={{ backgroundColor: "#f9f9f9", paddingVertical: 6 }}
     >
       <Text style={{ fontSize: 16, fontWeight: "700", color: "#333" }}>
-        📅 {section.title} — {section.totalPoints} pts {section.collapsed ? "▼" : "▲"}
+         {section.title} - Total {section.totalPoints} pts {section.collapsed ? "▼" : "▲"}
       </Text>
     </TouchableOpacity>
   );
@@ -184,7 +175,6 @@ export default function OrdersScreen() {
     let grandTotal = 0;
     const monthMap: { [month: string]: { orders: Order[]; total: number } } = {};
   
-    // Group and calculate per month
     filteredOrders.forEach((order) => {
       const month = format(new Date(order.purchase_date), "MMMM yyyy");
       if (!monthMap[month]) {
@@ -196,51 +186,77 @@ export default function OrdersScreen() {
       grandTotal += order.total_points_used;
     });
   
-    // Generate summary section
-    const summaryHTML = `
-      <h3 style="color:#000000;">Monthly Summary</h3>
-      <table border="1" cellpadding="6" cellspacing="0" width="100%">
-        <tr><th>Month</th><th>Total Points Used</th></tr>
-        ${Object.entries(monthMap)
-          .map(([month, group]) => `<tr><td>${month}</td><td>${group.total}</td></tr>`)
-          .join("")}
-        <tr><td><strong>Grand Total</strong></td><td><strong>${grandTotal}</strong></td></tr>
-      </table>
-      <br/>
-    `;
-  
-    // Generate detailed sections
     const monthSections = Object.entries(monthMap).map(([month, group]) => {
-      const ordersHTML = group.orders
-        .map((order) => {
-          const items = order.items
-            .map((i) => `<tr><td>${i.product_name}</td><td>${i.quantity}</td></tr>`)
-            .join("");
-  
+      const rows = group.orders.flatMap((order) =>
+        order.items.map((item, index) => {
+          const formattedDate = format(new Date(order.purchase_date), "dd MMM yyyy, h:mm a");
           return `
-            <h4>🧾 ${format(new Date(order.purchase_date), "dd MMM yyyy, h:mm a")}</h4>
-            <table border="1" cellpadding="6" cellspacing="0" width="100%">
-              <tr><th>Product</th><th>Qty</th></tr>
-              ${items}
-            </table>
-            <p><strong>Points Used:</strong> ${order.total_points_used}</p>
-          `;
+            <tr>
+              <td>${index === 0 ? formattedDate : ""}</td>
+              <td>${index === 0 ? (order.invoice_number || "") : ""}</td>
+              <td>${item.product_name}</td>
+              <td>${item.quantity}</td>
+              <td>${index === 0 ? order.total_points_used : ""}</td>
+            </tr>`;
         })
-        .join("<br/>");
+      );
   
       return `
-        <h3 style="color:#000000;">${month}</h3>
-        ${ordersHTML}
-        <p style="text-align:right;"><strong>Monthly Total:</strong> ${group.total} pts</p>
-        <hr/>
-      `;
+        <h3 style="color:#333;margin-bottom:5px;">${month}</h3>
+        <table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse;margin-bottom:20px;">
+          <thead style="background-color:#f0f0f0;">
+            <tr>
+              <th>Date</th>
+              <th>Invoice</th>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>Total Points</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.join("")}
+            <tr style="background-color:#eef;">
+              <td colspan="4" style="text-align:right;"><strong>Monthly Total:</strong></td>
+              <td><strong>${group.total}</strong></td>
+            </tr>
+          </tbody>
+        </table>`;
     });
   
     const html = `
       <html>
-        <body style="font-family:Arial;padding:16px;">
-          <h2 style="color:#000000;">Smart E-Waste – Order History</h2>
-          ${summaryHTML}
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 24px;
+              color: #222;
+            }
+            h2 {
+              text-align: center;
+              margin-bottom: 30px;
+              color: #006400;
+            }
+          </style>
+        </head>
+        <body>
+          <h2>♻️ Smart E-Waste – Monthly Purchase History</h2>
+  
+          <h3 style="color:#000;margin-top:0;">Summary</h3>
+          <table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse;margin-bottom:30px;">
+            <thead style="background-color:#f0f0f0;">
+              <tr><th>Month</th><th>Total Points Used</th></tr>
+            </thead>
+            <tbody>
+              ${Object.entries(monthMap)
+                .map(([month, g]) => `<tr><td>${month}</td><td>${g.total}</td></tr>`)
+                .join("")}
+              <tr style="background-color:#eef;">
+                <td><strong>Grand Total</strong></td><td><strong>${grandTotal}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+  
           ${monthSections.join("")}
         </body>
       </html>
@@ -254,6 +270,7 @@ export default function OrdersScreen() {
       alert("Failed to export PDF");
     }
   };
+  
   
 
   if (loading) return <View style={styles.container}><ActivityIndicator size="large" /></View>;
