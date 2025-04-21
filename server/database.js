@@ -25,7 +25,7 @@ db.serialize(() => {
       otp_verified BOOLEAN DEFAULT 0,
       total_reward_points INTEGER DEFAULT 0,
       cumulative_reward_points INTEGER DEFAULT 0,
-      level INTEGER DEFAULT 1,
+      level TEXT DEFAULT 'Bronze I',
       create_date TEXT NOT NULL,
       create_time TEXT NOT NULL,
       profile_image TEXT
@@ -96,7 +96,7 @@ db.serialize(() => {
       price INTEGER,
       stock_quantity INTEGER,
       status TEXT,
-      min_level_required INTEGER DEFAULT 1
+      min_level_required TEXT DEFAULT 'Bronze I'
     )
   `, (err) => {
     if (err) console.error('❌ Error creating products table:', err);
@@ -125,6 +125,7 @@ db.serialize(() => {
     CREATE TABLE IF NOT EXISTS orders (
       order_id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER,
+      invoice_number TEXT,
       total_points_used INTEGER,
       purchase_date TEXT,
       FOREIGN KEY(user_id) REFERENCES users(id)

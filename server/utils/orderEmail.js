@@ -1,7 +1,6 @@
 const transporter = require('./mailer');
-require('dotenv').config();
 
-const sendOrderEmail = (email, items, totalPoints) => {
+const sendOrderEmail = (email, items, totalPoints, invoiceNumber) => {
   const now = new Date();
   const formattedDate = now.toLocaleString('en-US', {
     day: '2-digit',
@@ -23,14 +22,32 @@ const sendOrderEmail = (email, items, totalPoints) => {
     })
     .join('');
 
-  const html = `
-    <h2>🎉 Smart E-Waste – Order Confirmation</h2>
-    <p><strong>Date:</strong> ${formattedDate}</p>
-    <p>You have successfully redeemed the following items:</p>
-    <ul>${itemList}</ul>
-    <p><strong>Total Points Used:</strong> ${totalPoints}</p>
-    <p>Thank you for being part of the sustainable movement ♻️</p>
+    const html = `
+    <html>
+      <body style="font-family: Arial, sans-serif; padding: 20px;">
+        <h2>Smart E-Waste – Order Receipt</h2>
+        <p><strong>Invoice Number:</strong> ${invoiceNumber}</p>
+        <p><strong>Date:</strong> ${formattedDate}</p>
+        <table border="1" cellspacing="0" cellpadding="6" width="100%">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemList}
+          </tbody>
+        </table>
+        <p><strong>Total Points Used:</strong> ${totalPoints}</p>
+        <p style="margin-top: 20px;">Thank you for being part of the sustainable movement ♻️</p>
+      </body>
+    </html>
   `;
+  
 
   const mailOptions = {
     from: process.env.EMAIL_USER,

@@ -2,20 +2,23 @@ const db = require("../database");
 
 // GET /cart
 const getCart = (req, res) => {
-  const userId = req.user.id;
+  const user_id = req.user.id;
 
-  db.all(`
-    SELECT c.product_id, p.product_name, p.price, c.quantity
-    FROM carts c
-    JOIN products p ON c.product_id = p.product_id
-    WHERE c.user_id = ?
-  `, [userId], (err, rows) => {
-    if (err) {
-      console.error("❌ Failed to fetch cart:", err);
-      return res.status(500).json({ error: "Failed to fetch cart" });
+  db.all(
+    `SELECT c.product_id, p.product_name, p.price, p.product_image, c.quantity
+     FROM carts c
+     JOIN products p ON c.product_id = p.product_id
+     WHERE c.user_id = ?`,
+    [user_id],
+    (err, rows) => {
+      if (err) {
+        console.error("Cart fetch error:", err);
+        return res.status(500).json({ success: false, message: "Failed to get cart" });
+      }
+
+      res.json({ success: true, cart: rows });
     }
-    res.json({ success: true, cart: rows });
-  });
+  );
 };
 
 // POST /cart

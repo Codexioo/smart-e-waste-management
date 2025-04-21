@@ -14,38 +14,36 @@ exports.checkout = (req, res) => {
     [user_id],
     (err, user) => {
       if (err || !user) {
-        return res
-          .status(404)
-          .json({ success: false, message: "User not found" });
+        return res.status(404).json({ success: false, message: "User not found" });
       }
 
       let totalCost = 0;
 
-      const validateStock = items.map(
-        (item) =>
-          new Promise((resolve, reject) => {
-            db.get(
-              `SELECT * FROM products WHERE product_id = ?`,
-              [item.product_id],
-              (err, product) => {
-                if (err || !product) return reject("Product not found");
-                if (item.quantity > product.stock_quantity)
-                  return reject(`Not enough stock for ${product.product_name}`);
-                totalCost += item.quantity * product.price;
-                item.product_name = product.product_name;
-                item.price = product.price;
-                resolve();
-              }
-            );
-          })
+      const validateStock = items.map((item) =>
+        new Promise((resolve, reject) => {
+          db.get(
+            `SELECT * FROM products WHERE product_id = ?`,
+            [item.product_id],
+            (err, product) => {
+              if (err || !product) return reject("Product not found");
+              if (item.quantity > product.stock_quantity)
+                return reject(`Not enough stock for ${product.product_name}`);
+              totalCost += item.quantity * product.price;
+              item.product_name = product.product_name;
+              item.price = product.price;
+              resolve();
+            }
+          );
+        })
       );
 
       Promise.all(validateStock)
         .then(() => {
           if (user.total_reward_points < totalCost) {
-            return res
-              .status(400)
-              .json({ success: false, message: "Not enough reward points" });
+            return res.status(400).json({
+              success: false,
+              message: "Not enough reward points",
+            });
           }
 
           const now = new Date().toISOString();
@@ -55,12 +53,21 @@ exports.checkout = (req, res) => {
              VALUES (?, ?, ?)`,
             [user_id, totalCost, now],
             function (err) {
-              if (err)
-                return res
-                  .status(500)
-                  .json({ success: false, message: "Order insert failed" });
+              if (err) {
+                return res.status(500).json({ success: false, message: "Order insert failed" });
+              }
 
               const orderId = this.lastID;
+
+              // Generate invoice number
+              const dateObj = new Date();
+              const formattedDate = dateObj.toISOString().slice(0, 10).replace(/-/g, ""); // yyyyMMdd
+              const formattedTime = dateObj.toTimeString().slice(0, 5).replace(":", ""); // HHmm
+              const paddedId = String(orderId).padStart(4, "0");
+              const invoiceNumber = `${paddedId}${formattedDate}${formattedTime}`;
+
+              // Store invoice number
+              db.run(`UPDATE orders SET invoice_number = ? WHERE order_id = ?`, [invoiceNumber, orderId]);
 
               items.forEach((item) => {
                 db.run(
@@ -85,14 +92,17 @@ exports.checkout = (req, res) => {
                  VALUES (?, ?, 'redeem', ?, ?)`,
                 [user_id, totalCost, now, 'Shop Purchase']
               );
-              
 
-              sendOrderEmail(user.email, items, totalCost)
-                .then(() => res.json({ success: true }))
-                .catch((emailErr) => {
-                  console.error("Email failed:", emailErr);
-                  res.json({ success: true, warning: "Email failed to send" });
-                });
+              // Clear cart
+              db.run(`DELETE FROM carts WHERE user_id = ?`, [user_id]);
+
+              // Respond immediately
+              res.json({ success: true });
+
+              // Send email in background
+              sendOrderEmail(user.email, items, totalCost, invoiceNumber)
+                .then(() => console.log("📧 Email sent"))
+                .catch((emailErr) => console.error("❌ Email failed:", emailErr));
             }
           );
         })
@@ -109,15 +119,16 @@ exports.getOrders = (req, res) => {
 
   db.all(
     `SELECT 
-        o.order_id, 
-        o.total_points_used, 
-        o.purchase_date,
-        GROUP_CONCAT(p.product_name || '|' || oi.quantity) AS items
+      o.order_id, 
+      o.invoice_number,
+      o.total_points_used, 
+      o.purchase_date,
+      GROUP_CONCAT(p.product_name || '|' || p.product_image || '|' || oi.quantity) AS items
      FROM orders o
      JOIN order_items oi ON o.order_id = oi.order_id
      JOIN products p ON oi.product_id = p.product_id
      WHERE o.user_id = ?
-     GROUP BY o.order_id, datetime(o.purchase_date), o.total_points_used
+     GROUP BY o.order_id
      ORDER BY datetime(o.purchase_date) DESC`,
     [user_id],
     (err, rows) => {
@@ -128,11 +139,16 @@ exports.getOrders = (req, res) => {
 
       const formatted = rows.map(order => ({
         order_id: order.order_id,
+        invoice_number: order.invoice_number,
         total_points_used: order.total_points_used,
         purchase_date: order.purchase_date,
         items: order.items.split(",").map(i => {
-          const [product_name, quantity] = i.split("|");
-          return { product_name, quantity: Number(quantity) };
+          const [product_name, product_image, quantity] = i.split("|");
+          return {
+            product_name,
+            product_image,
+            quantity: Number(quantity)
+          };
         })
       }));
 

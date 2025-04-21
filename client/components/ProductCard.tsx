@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "../styles/shopStyles";
 import * as Animatable from "react-native-animatable";
@@ -12,8 +12,10 @@ type Props = {
   quantity: number;
   onIncrease: () => void;
   onDecrease: () => void;
-  userLevel: number;
-  minLevel: number;
+  userLevel: string;
+  minLevel: string;
+  image?: string;
+  status?: string; // ✅ new prop
 };
 
 const ProductCard = ({
@@ -26,8 +28,25 @@ const ProductCard = ({
   onDecrease,
   userLevel,
   minLevel,
+  image,
+  status,
 }: Props) => {
-  const isLocked = userLevel < minLevel;
+  
+  const levelRank = [
+    "Bronze I", "Bronze II",
+    "Silver I", "Silver II",
+    "Gold I", "Gold II",
+    "Platinum I", "Platinum II",
+    "Diamond", "Eco Legend"
+  ];
+  
+  const userLevelIndex = Math.max(levelRank.indexOf(userLevel), 0);
+const minLevelIndex = Math.max(levelRank.indexOf(minLevel), 0);
+
+  
+  const isLocked =
+    userLevelIndex < minLevelIndex || stock === 0 || status === "Out of Stock";
+  
 
   return (
     <Animatable.View
@@ -36,6 +55,13 @@ const ProductCard = ({
       delay={50}
       style={styles.productCard}
     >
+      {image && (
+        <Image
+          source={{ uri: image }}
+          style={{ width: "100%", height: 160, borderRadius: 10, marginBottom: 10 }}
+          resizeMode="cover"
+        />
+      )}
       <Text style={styles.productName}>{name}</Text>
       <Text style={styles.productDesc}>{description}</Text>
       <Text style={styles.productPrice}>Price: {price} pts</Text>
@@ -54,7 +80,10 @@ const ProductCard = ({
             textAlign: "center",
           }}
         >
-          🔒 Requires Level {minLevel}
+          {stock === 0 || status === "Out of Stock"
+  ? `Out of Stock 🚫`
+  : `🔒 Requires Level "${minLevel}"`}
+
         </Animatable.Text>
       ) : (
         <View style={styles.quantityRow}>
