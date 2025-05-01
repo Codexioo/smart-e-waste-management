@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import axios from "../api/axiosInstance";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import "../styles/AdminLogin.css";
-
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -12,6 +11,11 @@ export default function AdminLogin() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
+
+    // 🔒 If already logged in, redirect to dashboard
+    if (localStorage.getItem("adminToken")) {
+      return <Navigate to="/dashboard" replace />;
+    }
 
   const handleLogin = async () => {
     let isValid = true;
