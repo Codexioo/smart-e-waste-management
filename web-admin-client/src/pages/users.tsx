@@ -10,7 +10,6 @@ const Users = () => {
     telephone: string;
     address: string;
     role: string;
-    otp_verified: boolean;
     total_reward_points: number;
   }
 
@@ -114,7 +113,6 @@ const Users = () => {
             <th>Telephone</th>
             <th>Address</th>
             <th>Role</th>
-            <th>OTP Verified</th>
             <th>Reward Points</th>
             <th>Actions</th>
           </tr>
@@ -128,7 +126,6 @@ const Users = () => {
               <td>{user.telephone}</td>
               <td>{user.address}</td>
               <td>{user.role}</td>
-              <td>{user.otp_verified ? '✅' : '❌'}</td>
               <td>{user.total_reward_points}</td>
               <td>
               <div className="button-group">
