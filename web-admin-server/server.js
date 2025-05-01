@@ -8,6 +8,8 @@ const userRoutes = require('./routes/userRoutes');
 //Maleen's routes
 const uploadRoutes = require("./routes/uploadRoutes");
 const productRoutes = require("./routes/productRoutes");
+const dashboardRoutes = require('./routes/dashboardRoutes');
+
 const path = require("path");
 
 
@@ -26,11 +28,15 @@ app.use('/api/admin', adminAuthRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/requests', pickupRoutes);
+app.use('/api', dashboardRoutes);
+
+
 
 //Maleen's routes
 app.use("/api/upload", uploadRoutes);
 app.use("/api/products", productRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 
 
 app.listen(PORT, () => {
