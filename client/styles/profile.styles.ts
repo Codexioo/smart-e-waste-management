@@ -1,206 +1,142 @@
-// styles/profile.styles.ts
-import { StyleSheet, Dimensions } from "react-native";
-import COLORS from "../constants/colors";
 
-const { width } = Dimensions.get("window");
+import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: COLORS.background,
-    padding: 20,
-    justifyContent: "center",
-  },
-  scrollViewStyle: {
+  safeContainer: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: "#f6f6f6",
   },
-  topIllustration: {
+  container: {
+    flex: 1,
+    padding: 20,
+    marginBottom: 70,
+    marginTop: 30
+  },
+  topSection: {
     alignItems: "center",
-    width: "100%",
-  },
-  illustrationImage: {
-    width: width * 0.75,
-    height: width * 0.75,
-  },
-  card: {
-    backgroundColor: COLORS.cardBackground,
-    borderRadius: 16,
-    padding: 24,
-    shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 2,
-    borderColor: COLORS.border,
-    marginTop: -24,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "700" as const,
-    fontFamily: "JetBrainsMono-Medium",
-    color: COLORS.primary,
-    marginBottom: 8,
-    textAlign: "center" as const
-  },
-  subtitle: {
-    fontSize: 16,
-    color: COLORS.textSecondary,
-    textAlign: "center" as const,
-  },
-  formContainer: {
-    marginBottom: 16,
-  },
-  inputGroup: {
     marginBottom: 20,
   },
-  label: {
-    fontSize: 14,
-    marginBottom: 8,
-    color: COLORS.textPrimary,
-    fontWeight: "500" as const,
-  },
-  inputContainer: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    backgroundColor: COLORS.inputBackground,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    paddingHorizontal: 12,
-    paddingVertical: 10,  // Adds vertical padding to increase space
-    marginBottom: 16,  // Adds spacing between input fields
-  },
-  inputIcon: {
-    marginRight: 14,  // Increases space between icon and input field
-  },
-  input: {
-    flex: 1,
-    height: 48,
-    color: COLORS.textDark,
-    paddingLeft: 5,  // Adds slight padding for better spacing
-  },
-  eyeIcon: {
-    padding:8,
-  },
-  button: {
-    height: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 12,
-    marginHorizontal: 1,
-  },  
-  buttonText: {
-    color: COLORS.white,
-    fontSize: 16,
-    fontWeight: "600" as const,
-    textAlign: "center",
-    textAlignVertical: "center", // ensure vertical alignment
-    includeFontPadding: false,   // avoid Android font padding
-    paddingHorizontal: 6,        // small horizontal padding
-    lineHeight: 20,              // consistent line height
-  },  
-  footer: {
-    flexDirection: "row" as const,
-    justifyContent: "center" as const,
-    marginTop: 24,
-  },
-  footerText: {
-    color: COLORS.textSecondary,
-    marginRight: 5,
-  },
-  link: {
-    color: COLORS.primary,
-    fontWeight: "600" as const,
-  },
-
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-evenly", // better for even spacing
-    marginTop: 20,
-    paddingHorizontal: 0,
-    gap: 8,
-  },  
-  button2: {
-    flex: 1, // Each button takes equal space
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  
-  editButton: {
-    backgroundColor: COLORS.primary, // Customize Edit button color
-    marginRight: 4, // Adds space between buttons
-    height: 50, // Increased height to match the button style
-    paddingHorizontal: 40,
-  },
-  
-  deleteButton: {
-    backgroundColor: "red", // Customize Delete button color
-    marginLeft: 4, // Adds space between buttons
-    height: 50, // Increased height to match the button style
-    paddingHorizontal: 30,
-  },
-  logoutButton: {
-    backgroundColor: "#8E8E93", // Customize Delete button color
-    marginLeft: 4, // Adds space between buttons
-    height: 50, // Increased height to match the button style
-    paddingHorizontal: 3,
-  },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    marginTop: 5,
-    marginLeft: 5,
-  },
-  profileContainer: {
-    alignItems: "center",
-    marginBottom: 15,
-  },
-
-  editIcon: {
-    position: "absolute",
-    bottom: 0,
-    right: 5,
-    backgroundColor: COLORS.primary,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    marginBottom: 10,
-    backgroundColor: "#f0f0f0",
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 12,
+    backgroundColor: "#ccc",
   },
-  imageEditOptions: {
+  username: {
+    fontSize: 25,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 4,
+  },
+  joinDate: {
+    fontSize: 13,
+    color: "#666",
+  },
+  quoteBox: {
+    backgroundColor: "#ffffff",
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 24,
+    borderLeftWidth: 4,
+    borderLeftColor: "#4CAF50",
+  },
+  quoteText: {
+    fontStyle: "italic",
+    color: "#555",
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  levelBarBox: {
+    borderRadius: 10,
+    padding: 16,
+    backgroundColor: "#4CAF50",
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  levelBarText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  progressBar: {
+    height: 10,
+    backgroundColor: "#e0dede",
+    borderRadius: 5,
+    overflow: "hidden",
+    marginVertical: 8,
+  },
+  progress: {
+    height: "100%",
+    borderRadius: 5,
+    backgroundColor: "#fff",
+  },
+  labelRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+    gap: 12,
+  },
+  statBox: {
+    flex: 1,
+    backgroundColor: "#f3f4f6",
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    elevation: 2,
     alignItems: "center",
-    gap: 6,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
   },
-    
-  addImageText: {
-    color: COLORS.primary,
+  statValue: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#00A52C",
+    fontWeight: "600",
+    marginTop: 6,
     textAlign: "center",
   },
-  removeImageText: {
-    color: "red",
-    textAlign: "center",
-  }
-  
-  
+  detailsCard: {
+    backgroundColor: "#f3f4f6",
+    borderRadius: 12,
+    paddingVertical: 20,
+    paddingHorizontal: 24,
+    marginBottom: 24,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  detailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+  },
+  detailLabel: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#333",
+  },
+  detailValue: {
+    fontSize: 14,
+    color: "#555",
+    textAlign: "right",
+    flexShrink: 1,
+  },
 });
 
 export default styles;
