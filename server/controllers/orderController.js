@@ -123,7 +123,12 @@ exports.getOrders = (req, res) => {
       o.invoice_number,
       o.total_points_used, 
       o.purchase_date,
-      GROUP_CONCAT(p.product_name || '|' || p.product_image || '|' || oi.quantity) AS items
+      GROUP_CONCAT(
+        p.product_name || '|' || 
+        p.product_image || '|' || 
+        oi.quantity || '|' || 
+        p.price
+      ) AS items
      FROM orders o
      JOIN order_items oi ON o.order_id = oi.order_id
      JOIN products p ON oi.product_id = p.product_id
@@ -143,11 +148,12 @@ exports.getOrders = (req, res) => {
         total_points_used: order.total_points_used,
         purchase_date: order.purchase_date,
         items: order.items.split(",").map(i => {
-          const [product_name, product_image, quantity] = i.split("|");
+          const [product_name, product_image, quantity, price] = i.split("|");
           return {
             product_name,
             product_image,
-            quantity: Number(quantity)
+            quantity: Number(quantity),
+            points_per_unit: Number(price)
           };
         })
       }));
@@ -156,3 +162,4 @@ exports.getOrders = (req, res) => {
     }
   );
 };
+
