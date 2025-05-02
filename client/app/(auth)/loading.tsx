@@ -4,11 +4,15 @@ import {
   import styles from "../../styles/loading";
   import React from "react";
   import { useRouter } from "expo-router"; // Import useRouter to navigate
-  
+  import RedirectIfLoggedIn from "../../components/RedirectIfLoggedIn"; 
+
   export default function Index() {
     const router = useRouter(); // Initialize the router
   
+
     return (
+        <>
+        <RedirectIfLoggedIn />
       <View style={styles.container}>
         {/* E-Waste Logo */}
         <Image 
@@ -36,6 +40,7 @@ import {
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
       </View>
+      </>
     );
   }
   
