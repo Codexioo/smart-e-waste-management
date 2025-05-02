@@ -21,28 +21,40 @@ router.get('/profile', authenticate, (req, res) => {
 });
 
 // 🔄 PUT /profile
-router.put('/profile', authenticate, (req, res) => {
-  const userId = req.user.id;
-  const { username, telephone, address, email, profile_image } = req.body;
+router.put('/profile', authenticate, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { username, telephone, address, email, profile_image } = req.body;
 
-  if (!username || !telephone || !address) {
-    return res.status(400).json({ error: "All fields are required" });
-  }
-
-  const sql = `
-    UPDATE users
-    SET username = ?, telephone = ?, address = ?, email = ?, profile_image = ?
-    WHERE id = ?
-  `;
-
-  db.run(sql, [username, telephone, address, email, profile_image || null, userId], function (err) {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: "Database error" });
+    if (!username || !telephone || !address) {
+      return res.status(400).json({ error: "All fields are required" });
     }
+
+    const sql = `
+      UPDATE users
+      SET username = ?, telephone = ?, address = ?, email = ?, profile_image = ?
+      WHERE id = ?
+    `;
+
+    await new Promise((resolve, reject) => {
+      db.run(
+        sql,
+        [username, telephone, address, email, profile_image || null, userId],
+        function (err) {
+          if (err) return reject(err);
+          resolve();
+        }
+      );
+    });
+
     return res.json({ message: "Profile updated successfully" });
-  });
+
+  } catch (err) {
+    console.error("PUT /profile error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
 });
+
 
 // ❌ DELETE /profile
 router.delete('/profile', authenticate, (req, res) => {

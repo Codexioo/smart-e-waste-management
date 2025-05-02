@@ -17,6 +17,7 @@ import {
   import useProtectedRoute from "@/hooks/useProtectedRoute";
   import { getToken, getUser, setUser, clearStorage } from "@/utils/storage";
   import * as ImagePicker from 'expo-image-picker';
+  import BottomBar from "../../components/bottombar";
   
   export default function Profile() {
     useProtectedRoute();
@@ -89,9 +90,19 @@ import {
   
         await axios.put(
           "/profile",
-          { username: name, telephone, address, email, profile_image: profileImage },
-          { headers: { Authorization: `Bearer ${token}` } }
+          {
+            username: name,
+            telephone,
+            address,
+            email,
+            profile_image: profileImage,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            timeout: 20000, // wait up to 15 seconds
+          }
         );
+        
   
         const oldUser = await getUser();
         const updatedUser = { ...oldUser, username: name, telephone, address, email };
@@ -275,6 +286,7 @@ import {
   )}
 </View>
           </View>
+           <BottomBar />
         </View>
     );
   }
