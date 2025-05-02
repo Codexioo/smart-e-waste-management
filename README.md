@@ -5,7 +5,7 @@
 ![SQLite](https://img.shields.io/badge/SQLite-Database-lightgrey)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-A cross-platform system for optimizing electronic waste (e-waste) collection and promoting sustainability through gamification, smart routing, and digital incentives.
+A cross platform system for optimizing electronic waste (e-waste) collection and promoting sustainability through gamification, smart routing, and digital incentives.
 
 ---
 
@@ -24,7 +24,7 @@ A cross-platform system for optimizing electronic waste (e-waste) collection and
 
 ## 🚀 Features
 
-- 🔐 **Secure Authentication** – Role-based login with OTP and password support.
+- 🔐 **Secure Authentication** – Role-based login and password support.
 - 🗓️ **Pickup Request System** – Schedule and manage e-waste collection via app.
 - 🏆 **Gamified Rewards & Levels** – Earn points, level up, and redeem real rewards.
 - 🧭 **Route Optimization** – Google Maps API for smart waste collection routing.
@@ -34,14 +34,14 @@ A cross-platform system for optimizing electronic waste (e-waste) collection and
 
 ## 🛠 Tech Stack
 
-| Layer       | Technology             |
+| Layer       | Technology              |
 |-------------|-------------------------|
 | Mobile App  | React Native (Expo)     |
 | Backend     | Node.js + Express       |
 | Database    | SQLite                  |
 | Web Admin   | React (Vite/CRA)        |
 | Maps/Routing| Google Maps API         |
-| Auth        | JWT & OTP Verification  |
+| Auth        | JWT Verification        |
 
 ---
 
@@ -112,7 +112,7 @@ npm start
 
 ## 📦 Key Modules
 
-- 🔑 **Role-Based Access & OTP Login**
+- 🔑 **Role-Based Access & Login**
 - 🏅 **Rewards, Levels & In-App Store**
 - 📍 **Google Maps Route Optimization**
 - 📲 **Pickup Request & Collector Assignment**
