@@ -18,7 +18,7 @@ const SETTINGS = [
   { icon: "book-open", label: "Order History", route: "screens/orders" },
   { icon: "file", label: "Reward History", route: "screens/rewards" },
   { icon: "truck", label: "Collect Waste", route: "screens/driver" },
-  { icon: "info", label: "About", route: null }, 
+  // { icon: "info", label: "About", route: null }, 
   { icon: "log-out", label: "Log out", route: "logout" },
 ];
 
