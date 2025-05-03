@@ -5,6 +5,8 @@ import Select from 'react-select';
 import '../styles/requests.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 Modal.setAppElement('#root');
 
@@ -55,6 +57,16 @@ const Requests = () => {
     Galle: ['Hikkaduwa', 'Ambalangoda', 'Karapitiya'],
     Jaffna: ['Chunnakam', 'Nallur', 'Kopay'],
   };
+
+  interface PickupReportItem {
+    request_code: string;
+    address: string;
+    district: string;
+    city: string;
+    waste_types: string;
+    create_date: string;
+    status: string;
+  }
 
   useEffect(() => {
     axios.get('http://localhost:9091/api/requests')
@@ -121,6 +133,73 @@ const Requests = () => {
     (!status || req.status === status)
   ));
 
+  const handleDownloadPickupReport = async () => {
+    try {
+      const response = await axios.get("http://localhost:9091/api/report/pickup-report");
+      const pickupHistory = response.data.pickupReport;
+  
+      const tableRows = pickupHistory.length > 0
+        ? pickupHistory.map((item: PickupReportItem) => `
+
+            <tr>
+              <td>${item.request_code}</td>
+              <td>${item.address}, ${item.district}, ${item.city}</td>
+              <td>${item.waste_types}</td>
+              <td>${item.create_date?.split("T")[0]}</td>
+              <td>${item.status}</td>
+            </tr>
+          `).join("")
+        : "<tr><td colspan='5'>No pickup records</td></tr>";
+  
+      const reportHtml = `
+        <div id="report-content" style="padding: 20px; font-family: Arial;">
+          <h2>Smart E-Waste – Pickup Report</h2>
+          <table border="1" cellspacing="0" cellpadding="8" style="width:100%;">
+            <thead>
+              <tr>
+                <th>Request Code</th>
+                <th>Address</th>
+                <th>Waste Types</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows}
+            </tbody>
+          </table>
+        </div>
+      `;
+  
+      // Create a temporary element for rendering
+      const container = document.createElement('div');
+      container.innerHTML = reportHtml;
+      container.style.position = 'fixed';
+      container.style.left = '-9999px';
+      document.body.appendChild(container);
+  
+      const element = container.querySelector('#report-content') as HTMLElement;
+      const canvas = await html2canvas(element);
+  
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pageWidth;
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+  
+      pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, pdfHeight);
+      pdf.save('pickup-report.pdf');
+  
+      document.body.removeChild(container);
+    } catch (error) {
+      toast.error("❌ Failed to generate pickup report.");
+      console.error("Download error:", error);
+    }
+  };
+  
+  
   return (
     <div className="admin-requests">
       <h2 className="page-title">Pickup Requests</h2>
@@ -146,6 +225,10 @@ const Requests = () => {
         <button className="reset-btn" onClick={() => {
           setSearch(''); setDistrict(''); setCity(''); setDate(''); setStatus('');
         }}>Reset Filters</button>
+
+    <button className="download-btn" onClick={handleDownloadPickupReport}>
+    Download Pickup Report
+    </button>
       </div>
 
       {/* Table */}
