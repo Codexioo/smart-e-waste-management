@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// request.tsx
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -14,10 +15,10 @@ import {
 import DropDownPicker from 'react-native-dropdown-picker';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BottomBar from "../../components/bottombar";
+import BottomBar from '../../components/bottombar';
 import axios from '../../api/axiosInstance';
-
-
+import MapView, { Marker, Region } from 'react-native-maps';
+import * as Location from 'expo-location';
 
 const API_URL = '/request-pickup';
 
@@ -40,19 +41,49 @@ const citiesByDistrict: Record<string, string[]> = {
 const wasteTypes = ['Plastic', 'Glass', 'Metal', 'Paper'];
 
 const Request = () => {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    address: string;
+    district: string | null;
+    city: string | null;
+    user_id: number | null;
+    latitude: number | null;
+    longitude: number | null;
+  }>({
     address: '',
     district: null,
     city: null,
     user_id: null,
+    latitude: null,
+    longitude: null,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [openDistrict, setOpenDistrict] = useState(false);
   const [openCity, setOpenCity] = useState(false);
   const [cityList, setCityList] = useState<{ label: string; value: string }[]>([]);
   const [selectedWastes, setSelectedWastes] = useState<string[]>([]);
+  const [region, setRegion] = useState<Region | null>(null);
 
   useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        const location = await Location.getCurrentPositionAsync({});
+        setRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        });
+        setForm((prev) => ({
+          ...prev,
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        }));
+      } else {
+        Alert.alert('Location permission not granted');
+      }
+    })();
+
     const getUser = async () => {
       try {
         const userData = await AsyncStorage.getItem('user');
@@ -72,9 +103,6 @@ const Request = () => {
       const cities = citiesByDistrict[form.district];
       setCityList(cities.map((city) => ({ label: city, value: city })));
       setForm((prev) => ({ ...prev, city: null }));
-    } else {
-      setCityList([]);
-      setForm((prev) => ({ ...prev, city: null }));
     }
   }, [form.district]);
 
@@ -90,6 +118,7 @@ const Request = () => {
     if (!form.district) newErrors.district = 'Please select a district';
     if (!form.city) newErrors.city = 'Please select a city';
     if (selectedWastes.length === 0) newErrors.waste_types = 'Select at least one waste type';
+    if (!form.latitude || !form.longitude) newErrors.location = 'Please select your location';
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -97,14 +126,12 @@ const Request = () => {
       return;
     }
 
-    const requestData = {
-      ...form,
-      waste_types: selectedWastes,
-      create_date: new Date().toISOString(),
-    };
-
     try {
-      await axios.post(API_URL, requestData);
+      await axios.post(API_URL, {
+        ...form,
+        waste_types: selectedWastes,
+        create_date: new Date().toISOString(),
+      });
       Alert.alert('Success', 'Pickup request submitted successfully');
       router.push('/screens/thankyou');
 
@@ -113,6 +140,8 @@ const Request = () => {
         district: null,
         city: null,
         user_id: form.user_id,
+        latitude: null,
+        longitude: null,
       });
       setSelectedWastes([]);
       setErrors({});
@@ -128,9 +157,43 @@ const Request = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
           <Text style={styles.title}>Pickup Request</Text>
 
+          {/* Map Search */}
+          <Text style={styles.subTitle}>Search Location (drag pin)</Text>
+          {region && (
+            <MapView
+              style={{ height: 200, borderRadius: 10, marginBottom: 10 }}
+              region={region}
+              onRegionChangeComplete={(r) => {
+                setRegion(r);
+                setForm((prev) => ({
+                  ...prev,
+                  latitude: r.latitude,
+                  longitude: r.longitude,
+                }));
+              }}
+            >
+              <Marker
+                coordinate={{
+                  latitude: region.latitude,
+                  longitude: region.longitude,
+                }}
+                draggable
+                onDragEnd={(e) => {
+                  const { latitude, longitude } = e.nativeEvent.coordinate;
+                  setForm((prev) => ({ ...prev, latitude, longitude }));
+                }}
+              />
+            </MapView>
+          )}
+          {errors.location && <Text style={styles.errorText}>{errors.location}</Text>}
+
+          {/* Address */}
           <TextInput
             style={[styles.input, errors.address && styles.errorInput]}
             placeholder="Address"
@@ -139,62 +202,69 @@ const Request = () => {
           />
           {errors.address && <Text style={styles.errorText}>{errors.address}</Text>}
 
-          <View style={{ zIndex: 2000 }}>
-            <DropDownPicker
-              open={openDistrict}
-              value={form.district}
-              items={sriLankanDistricts}
-              setOpen={setOpenDistrict}
-              setValue={(cb) => {
-                const value = cb(form.district);
-                setForm((prev) => ({ ...prev, district: value }));
-              }}
-              placeholder="Select District"
-              style={[styles.dropdown, errors.district && styles.errorDropdown]}
-              containerStyle={{ marginBottom: 10 }}
-            />
-          </View>
+          {/* District */}
+          <DropDownPicker
+            open={openDistrict}
+            value={form.district}
+            items={sriLankanDistricts}
+            setOpen={setOpenDistrict}
+            setValue={(cb) =>
+              setForm((prev) => ({ ...prev, district: cb(form.district) }))
+            }
+            placeholder="Select District"
+            style={[styles.dropdown, errors.district && styles.errorDropdown]}
+            containerStyle={{ marginBottom: openDistrict ? 250 : 10 }}
+            zIndex={3000}
+            zIndexInverse={1000}
+          />
           {errors.district && <Text style={styles.errorText}>{errors.district}</Text>}
 
-          <View style={{ zIndex: 1000 }}>
-            <DropDownPicker
-              open={openCity}
-              value={form.city}
-              items={cityList}
-              setOpen={setOpenCity}
-              setValue={(cb) => {
-                const value = cb(form.city);
-                setForm((prev) => ({ ...prev, city: value }));
-              }}
-              placeholder="Select City"
-              disabled={!form.district}
-              style={[styles.dropdown, errors.city && styles.errorDropdown]}
-              containerStyle={{ marginBottom: 10 }}
-            />
-          </View>
+          {/* City */}
+          <DropDownPicker
+            open={openCity}
+            value={form.city}
+            items={cityList}
+            setOpen={setOpenCity}
+            setValue={(cb) => setForm((prev) => ({ ...prev, city: cb(form.city) }))}
+            placeholder="Select City"
+            disabled={!form.district}
+            style={[styles.dropdown, errors.city && styles.errorDropdown]}
+            containerStyle={{ marginBottom: openCity ? 250 : 10 }}
+            zIndex={2000}
+            zIndexInverse={2000}
+          />
           {errors.city && <Text style={styles.errorText}>{errors.city}</Text>}
 
+          {/* Waste Types */}
           <Text style={styles.subTitle}>Select Waste Types</Text>
           <View style={styles.wasteTagWrapper}>
             {wasteTypes.map((type) => (
               <TouchableOpacity
                 key={type}
-                style={[styles.wasteTag, selectedWastes.includes(type) && styles.selectedWasteTag]}
+                style={[
+                  styles.wasteTag,
+                  selectedWastes.includes(type) && styles.selectedWasteTag,
+                ]}
                 onPress={() => toggleWasteType(type)}
               >
                 <Text style={styles.wasteTagText}>{type.toUpperCase()}</Text>
-                {selectedWastes.includes(type) && <Text style={styles.wasteTagClose}> ✕</Text>}
+                {selectedWastes.includes(type) && (
+                  <Text style={styles.wasteTagClose}> ✕</Text>
+                )}
               </TouchableOpacity>
             ))}
           </View>
-          {errors.waste_types && <Text style={styles.errorText}>{errors.waste_types}</Text>}
+          {errors.waste_types && (
+            <Text style={styles.errorText}>{errors.waste_types}</Text>
+          )}
 
+          {/* Confirm Button */}
           <TouchableOpacity style={styles.button} onPress={handleSubmit}>
             <Text style={styles.buttonText}>Confirm Request</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
-       <BottomBar />
+      <BottomBar />
     </SafeAreaView>
   );
 };

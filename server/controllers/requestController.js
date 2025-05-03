@@ -2,13 +2,13 @@
 const { insertRequest, getRequestsByUserId } = require('../models/requestModel');
 
 const handlePickupRequest = (req, res) => {
-  const { address, district, city, user_id, waste_types } = req.body;
+  const { address, district, city, user_id, waste_types, latitude, longitude } = req.body;
 
-  if (!address || !district || !city || !user_id || !waste_types || !waste_types.length) {
-    return res.status(400).json({ error: 'All fields are required including waste_types' });
+  if (!address || !district || !city || !user_id || !waste_types || !waste_types.length || !latitude || !longitude) {
+    return res.status(400).json({ error: 'All fields are required including waste_types and location' });
   }
 
-  insertRequest({ address, district, city, user_id, waste_types }, (err, result) => {
+  insertRequest({ address, district, city, user_id, waste_types, latitude, longitude }, (err, result) => {
     if (err) {
       console.error('❌ DB Insert Error:', err);
       return res.status(500).json({ error: 'Failed to insert request' });
