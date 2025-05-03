@@ -202,14 +202,19 @@ const html = `
         ListHeaderComponent={
           <>
             <Text style={styles.heading}>Welcome Back 👋</Text>
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Reward Points</Text>
+           {/* <View style={styles.card}>
+              {/* <Text style={styles.cardTitle}>Reward Points</Text>
               <Text style={styles.points}>45,678</Text>
-              <Text style={styles.growth}>+20% this month</Text>
-              <TouchableOpacity onPress={handleDownloadReport} style={styles.reportBtn}>
+              <Text style={styles.growth}>+20% this month</Text> */}
+              {/* <TouchableOpacity onPress={handleDownloadReport} style={styles.reportBtn}>
                 <Text style={styles.reportText}>Download Summary</Text>
               </TouchableOpacity>
-            </View>
+            </View> */} 
+
+            <TouchableOpacity style={styles.cardButton} onPress={handleDownloadReport}>
+            <Text style={styles.cardButtonText}>Download Summary</Text>
+            </TouchableOpacity>
+
 
             <View style={styles.actionsContainer}>
               <TouchableOpacity
@@ -265,13 +270,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#4CAF50",
     padding: 20,
     borderRadius: 16,
-    marginBottom: 20,
+    marginBottom: 20,    
   },
   cardTitle: { color: "#fff", fontSize: 16, marginBottom: 5 },
   points: { fontSize: 32, fontWeight: "bold", color: "#fff" },
   growth: { color: "#e0ffe0", marginTop: 5 },
   reportBtn: { marginTop: 10, alignSelf: "flex-end" },
-  reportText: { color: "#fff", textDecorationLine: "underline" },
+  reportText: {   color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+    textAlign: "center", },
   actionsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -298,6 +306,27 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: "center",
   },
+  cardButton: {
+    backgroundColor: "#4CAF50",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  
+  cardButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  
   actionText: { color: "#fff", marginLeft: 8, fontWeight: "600" },
   searchBar: {
     backgroundColor: "#fff",
