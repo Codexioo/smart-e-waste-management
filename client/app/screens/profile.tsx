@@ -9,7 +9,7 @@ import {
     Image,
   } from "react-native";
   import React, { useState, useEffect } from "react";
-  import styles from "../../styles/profile.styles";
+  import styles from "../../styles/profile.styles2";
   import { Ionicons } from "@expo/vector-icons";
   import COLORS from "../../constants/colors";
   import { useRouter } from "expo-router";
