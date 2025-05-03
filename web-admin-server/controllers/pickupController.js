@@ -29,7 +29,6 @@ const getAllPickupRequests = (req, res) => {
   });
 };
 
-// Update pickup request status
 const updatePickupStatus = (req, res) => {
   const requestId = req.params.id;
   const { status } = req.body;
@@ -48,7 +47,6 @@ const updatePickupStatus = (req, res) => {
   });
 };
 
-// Edit pickup request
 const updatePickupRequest = (req, res) => {
   const requestId = req.params.id;
   const { address, district, city, waste_types } = req.body;
@@ -76,5 +74,5 @@ const updatePickupRequest = (req, res) => {
 module.exports = {
   getAllPickupRequests,
   updatePickupStatus,
-  updatePickupRequest,
+  updatePickupRequest
 };

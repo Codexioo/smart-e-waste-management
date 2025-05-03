@@ -35,24 +35,26 @@ db.serialize(() => {
     else console.log('✅ Table users is ready');
   });
 
-  // PICKUP REQUESTS
-  db.run(`
-    CREATE TABLE IF NOT EXISTS pickup_requests (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      request_code TEXT UNIQUE,
-      address TEXT NOT NULL,
-      district TEXT NOT NULL,
-      city TEXT NOT NULL,
-      waste_types TEXT NOT NULL,
-      create_date TEXT NOT NULL,
-      status TEXT CHECK(status IN ('pending', 'accepted', 'rejected', 'Assigned', 'completed')) NOT NULL DEFAULT 'pending',
-      user_id INTEGER NOT NULL,
-      FOREIGN KEY(user_id) REFERENCES users(id)
-    )
-  `, (err) => {
-    if (err) console.error('❌ Error creating pickup_requests table:', err);
-    else console.log('✅ Table pickup_requests is ready');
-  });
+// PICKUP REQUESTS
+db.run(`
+  CREATE TABLE IF NOT EXISTS pickup_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    request_code TEXT UNIQUE,
+    address TEXT NOT NULL,
+    district TEXT NOT NULL,
+    city TEXT NOT NULL,
+    waste_types TEXT NOT NULL,
+    create_date TEXT NOT NULL,
+    status TEXT CHECK(status IN ('pending', 'accepted', 'rejected', 'Assigned', 'completed')) NOT NULL DEFAULT 'pending',
+    latitude REAL,
+    longitude REAL,
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY(user_id) REFERENCES users(id)
+  )
+`, (err) => {
+  if (err) console.error('❌ Error creating pickup_requests table:', err);
+  else console.log('✅ Table pickup_requests is ready');
+});
 
   // WASTE COLLECTIONS
   db.run(`

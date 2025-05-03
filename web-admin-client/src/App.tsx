@@ -17,6 +17,7 @@ import './App.css';
 import Header from './components/Header';
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProductsPage from './pages/products';
+import AssignCollector from './pages/assignCollector';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
@@ -48,6 +49,7 @@ const App: React.FC = () => {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/requests" element={<Requests />} />
             <Route path="/profile" element={<AdminProfile />} />
+            <Route path="/assign-collectors" element={<AssignCollector />} />
             <Route path="/users" element={<Users />} />
             <Route path="/products" element={<ProductsPage />} />
           </Route>
