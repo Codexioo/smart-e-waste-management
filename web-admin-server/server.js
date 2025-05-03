@@ -4,6 +4,7 @@ const pickupRoutes = require('./routes/pickupRoutes');
 const adminAuthRoutes = require('./routes/adminAuth');
 const profileRoutes = require('./routes/adminProfile');
 const userRoutes = require('./routes/userRoutes');
+const pickupReportRoute = require('./routes/pickupReportDownload');
 
 //Maleen's routes
 const uploadRoutes = require("./routes/uploadRoutes");
@@ -29,6 +30,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/requests', pickupRoutes);
 app.use('/api', dashboardRoutes);
+app.use('/api/report', pickupReportRoute);
 
 
 

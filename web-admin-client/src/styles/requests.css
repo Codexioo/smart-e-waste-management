@@ -25,6 +25,26 @@
     border: 1px solid #ccc;
     font-size: 14px;
   }
+
+  .button-group {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .download-btn {
+    padding: 10px 14px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .download-btn:hover {
+    background-color: #1976D2;
+  }
   
   .reset-btn {
     background-color: #e74c3c;
