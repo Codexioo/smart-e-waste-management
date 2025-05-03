@@ -5,11 +5,14 @@ const adminAuthRoutes = require('./routes/adminAuth');
 const profileRoutes = require('./routes/adminProfile');
 const userRoutes = require('./routes/userRoutes');
 const pickupReportRoute = require('./routes/pickupReportDownload');
+const assignCollectorRoutes = require('./routes/assignCollector');
+
 
 //Maleen's routes
 const uploadRoutes = require("./routes/uploadRoutes");
 const productRoutes = require("./routes/productRoutes");
 const dashboardRoutes = require('./routes/dashboardRoutes');
+
 
 const path = require("path");
 
@@ -31,7 +34,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/requests', pickupRoutes);
 app.use('/api', dashboardRoutes);
 app.use('/api/report', pickupReportRoute);
-
+app.use('/api/assign-collector', assignCollectorRoutes);
 
 
 //Maleen's routes
