@@ -1,0 +1,31 @@
+.admin-requests {
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    margin: 20px;
+  }
+  
+  .page-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  
+  .request-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .request-table th,
+  .request-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    font-size: 14px;
+  }
+  
+  select {
+    padding: 6px;
+    border-radius: 6px;
+  }
