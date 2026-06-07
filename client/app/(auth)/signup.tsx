@@ -6,9 +6,10 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  ScrollView, 
+  ScrollView,
+  StyleSheet,
+  Dimensions,
 } from "react-native";
-import styles from "../../styles/signup.styles";
 import React, { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import COLORS from "@/constants/colors";
@@ -16,6 +17,7 @@ import { Link, useRouter } from "expo-router";
 import DropDownPicker from "react-native-dropdown-picker";
 import axios from "../../api/axiosInstance";
 
+const { width } = Dimensions.get("window");
 
 export default function Signup() {
   const [username, setUsername] = useState("");
@@ -27,7 +29,6 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
 
-
   const [selectedRole, setSelectedRole] = useState(null);
   const [roleOpen, setRoleOpen] = useState(false);
   const [roleItems, setRoleItems] = useState([
@@ -35,38 +36,19 @@ export default function Signup() {
     { label: "Waste Collector", value: "waste_collector" },
   ]);
 
-  const [errors, setErrors] = useState({
-    username: "",
-    email: "",
-    telephone: "",
-    address: "",
-    password: "",
-    confirmPassword: "",
-    selectedRole: "",
-  });
-
+  const [errors, setErrors] = useState<any>({});
   const router = useRouter();
 
   const handleSignup = async () => {
-    setErrors({
-      username: "",
-      email: "",
-      telephone: "",
-      address: "",
-      password: "",
-      confirmPassword: "",
-      selectedRole: "",
-    });
-  
+    setErrors({});
     let valid = true;
     let newErrors: any = {};
-  
-    // ✅ Validation logic (unchanged)
+
     if (!username.trim()) {
       newErrors.username = "Username is required.";
       valid = false;
     }
-  
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.trim()) {
       newErrors.email = "Email is required.";
@@ -75,7 +57,7 @@ export default function Signup() {
       newErrors.email = "Enter a valid email.";
       valid = false;
     }
-  
+
     const phoneRegex = /^[0-9]{10}$/;
     if (!telephone.trim()) {
       newErrors.telephone = "Telephone is required.";
@@ -84,12 +66,12 @@ export default function Signup() {
       newErrors.telephone = "Enter a valid 10-digit phone number.";
       valid = false;
     }
-  
+
     if (!address.trim()) {
       newErrors.address = "Address is required.";
       valid = false;
     }
-  
+
     if (!password) {
       newErrors.password = "Password is required.";
       valid = false;
@@ -97,7 +79,7 @@ export default function Signup() {
       newErrors.password = "Password must be at least 6 characters.";
       valid = false;
     }
-  
+
     if (!confirmPassword) {
       newErrors.confirmPassword = "Please confirm your password.";
       valid = false;
@@ -110,24 +92,24 @@ export default function Signup() {
       newErrors.selectedRole = "Please select a role.";
       valid = false;
     }
-  
+
     if (!valid) {
       setErrors(newErrors);
       return;
     }
-  
+
     setIsLoading(true);
-  
+
     try {
-      const response = await axios.post('/signup', {
+      await axios.post('/signup', {
         username,
         email,
         telephone,
         address,
         password,
-        role: selectedRole === "waste_collector" ? "collector" : selectedRole, // Normalize role
+        role: selectedRole === "waste_collector" ? "collector" : selectedRole,
       });
-  
+
       setIsLoading(false);
       alert("Signup Successful!");
       router.push("/(auth)");
@@ -141,248 +123,341 @@ export default function Signup() {
       }
     }
   };
-  
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-       <ScrollView
-    contentContainerStyle={{ flexGrow: 1 }}
-    keyboardShouldPersistTaps="handled"
-  >
-      <View style={styles.container}>
-        <View style={styles.card}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Sign Up</Text>
-          </View>
-
-          <View style={styles.formContainer}>
-                    {/* Role Dropdown */}
-          <View style={{ zIndex: roleOpen ? 1000 : 1 }}>
-            <Text style={styles.label}>Select Your Role:</Text>
-            <DropDownPicker
-              open={roleOpen}
-              value={selectedRole}
-              items={roleItems}
-              setOpen={setRoleOpen}
-              setValue={setSelectedRole}
-              setItems={setRoleItems}
-              placeholder="Select a role"
-              style={{
-                backgroundColor: COLORS.inputBackground,
-                borderColor: COLORS.border,
-                borderRadius: 12,
-                zIndex: 100, // Ensures it's above other elements
-              }}
-              dropDownContainerStyle={{
-                borderColor: COLORS.border,
-                borderRadius: 12,
-                zIndex: 1000, // Ensures the dropdown appears above other elements
-                elevation: 10, // Increases shadow effect (Android)
-              }}
-              textStyle={{
-                color: COLORS.textDark,
-              }}
-            />
-            {errors.selectedRole ? (
-              <Text style={styles.errorText}>{errors.selectedRole}</Text>
-            ) : null}
-          </View>
-
-
-            {/* Username */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Username</Text>
-              <View style={styles.inputContainer}>
-                <Ionicons
-                  name="person-outline"
-                  size={20}
-                  color={COLORS.primary}
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="John Doe"
-                  placeholderTextColor={COLORS.placeholderText}
-                  value={username}
-                  onChangeText={(text) => {
-                    setUsername(text);
-                    setErrors({ ...errors, username: "" });
-                  }}
-                  autoCapitalize="none"
-                />
-              </View>
-              {errors.username ? (
-                <Text style={styles.errorText}>{errors.username}</Text>
-              ) : null}
-            </View>
-
-            {/* Email */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email</Text>
-              <View style={styles.inputContainer}>
-                <Ionicons
-                  name="mail-outline"
-                  size={20}
-                  color={COLORS.primary}
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="johndoe@gmail.com"
-                  placeholderTextColor={COLORS.placeholderText}
-                  value={email}
-                  onChangeText={(text) => {
-                    setEmail(text);
-                    setErrors({ ...errors, email: "" });
-                  }}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-              </View>
-              {errors.email ? (
-                <Text style={styles.errorText}>{errors.email}</Text>
-              ) : null}
-            </View>
-
-            {/* Telephone */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Telephone</Text>
-              <View style={styles.inputContainer}>
-                <Ionicons
-                  name="call-outline"
-                  size={20}
-                  color={COLORS.primary}
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="0773651478"
-                  placeholderTextColor={COLORS.placeholderText}
-                  value={telephone}
-                  onChangeText={(text) => {
-                    setTelephone(text);
-                    setErrors({ ...errors, telephone: "" });
-                  }}
-                  keyboardType="phone-pad"
-                  autoCapitalize="none"
-                />
-              </View>
-              {errors.telephone ? (
-                <Text style={styles.errorText}>{errors.telephone}</Text>
-              ) : null}
-            </View>
-
-            {/* Address */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Address</Text>
-              <View style={styles.inputContainer}>
-                <Ionicons
-                  name="home-outline"
-                  size={20}
-                  color={COLORS.primary}
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="23/A, Gampaha"
-                  placeholderTextColor={COLORS.placeholderText}
-                  value={address}
-                  onChangeText={(text) => {
-                    setAddress(text);
-                    setErrors({ ...errors, address: "" });
-                  }}
-                  autoCapitalize="none"
-                />
-              </View>
-              {errors.address ? (
-                <Text style={styles.errorText}>{errors.address}</Text>
-              ) : null}
-            </View>
-
-            {/* Password */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Password</Text>
-              <View style={styles.inputContainer}>
-                <Ionicons
-                  name="lock-closed-outline"
-                  size={20}
-                  color={COLORS.primary}
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="********"
-                  placeholderTextColor={COLORS.placeholderText}
-                  value={password}
-                  onChangeText={(text) => {
-                    setPassword(text);
-                    setErrors({ ...errors, password: "" });
-                  }}
-                  secureTextEntry={!showPassword}
-                />
-              </View>
-              {errors.password ? (
-                <Text style={styles.errorText}>{errors.password}</Text>
-              ) : null}
-            </View>
-
-            {/* Confirm Password */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Confirm Password</Text>
-              <View style={styles.inputContainer}>
-                <Ionicons
-                  name="lock-closed-outline"
-                  size={20}
-                  color={COLORS.primary}
-                  style={styles.inputIcon}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="********"
-                  placeholderTextColor={COLORS.placeholderText}
-                  value={confirmPassword}
-                  onChangeText={(text) => {
-                    setConfirmPassword(text);
-                    setErrors({ ...errors, confirmPassword: "" });
-                  }}
-                  secureTextEntry={!showPassword}
-                />
-              </View>
-              {errors.confirmPassword ? (
-                <Text style={styles.errorText}>{errors.confirmPassword}</Text>
-              ) : null}
-            </View>
-
-            {/* Sign Up Button */}
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleSignup}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Sign Up</Text>
-              )}
+    <View style={styles.mainContainer}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          <View style={styles.headerContainer}>
+            <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={24} color={COLORS.white} />
             </TouchableOpacity>
-
-             {/* Footer */}
-             <View style={styles.footer}>
-              <Text style={styles.footerText}>Already have an account?</Text>
-              <Link href="/(auth)" asChild>
-                <TouchableOpacity>
-                  <Text style={styles.link}>Log In</Text>
-                </TouchableOpacity>
-              </Link>
-            </View>
-
+            <Text style={styles.title}>Create Account</Text>
+            <Text style={styles.subtitle}>Join us in making the world cleaner</Text>
           </View>
-        </View>
-      </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+          <View style={styles.card}>
+            <View style={styles.formContainer}>
+              {/* Role Dropdown */}
+              <View style={[styles.inputGroup, { zIndex: 2000 }]}>
+                <Text style={styles.label}>I am a...</Text>
+                <DropDownPicker
+                  open={roleOpen}
+                  value={selectedRole}
+                  items={roleItems}
+                  setOpen={setRoleOpen}
+                  setValue={setSelectedRole}
+                  setItems={setRoleItems}
+                  placeholder="Select your role"
+                  style={[styles.dropdown, errors.selectedRole ? styles.inputError : null]}
+                  dropDownContainerStyle={styles.dropdownContainer}
+                  textStyle={styles.dropdownText}
+                  placeholderStyle={styles.dropdownPlaceholder}
+                />
+                {errors.selectedRole ? (
+                  <Text style={styles.errorText}>{errors.selectedRole}</Text>
+                ) : null}
+              </View>
+
+              {/* Username */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Full Name</Text>
+                <View style={[styles.inputContainer, errors.username ? styles.inputError : null]}>
+                  <Ionicons name="person-outline" size={20} color={COLORS.primary} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="John Doe"
+                    placeholderTextColor={COLORS.textMuted}
+                    value={username}
+                    onChangeText={(text) => {
+                      setUsername(text);
+                      if (errors.username) setErrors({ ...errors, username: "" });
+                    }}
+                  />
+                </View>
+                {errors.username ? <Text style={styles.errorText}>{errors.username}</Text> : null}
+              </View>
+
+              {/* Email */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Email Address</Text>
+                <View style={[styles.inputContainer, errors.email ? styles.inputError : null]}>
+                  <Ionicons name="mail-outline" size={20} color={COLORS.primary} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="john@example.com"
+                    placeholderTextColor={COLORS.textMuted}
+                    value={email}
+                    onChangeText={(text) => {
+                      setEmail(text);
+                      if (errors.email) setErrors({ ...errors, email: "" });
+                    }}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                </View>
+                {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
+              </View>
+
+              {/* Telephone */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Phone Number</Text>
+                <View style={[styles.inputContainer, errors.telephone ? styles.inputError : null]}>
+                  <Ionicons name="call-outline" size={20} color={COLORS.primary} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="0771234567"
+                    placeholderTextColor={COLORS.textMuted}
+                    value={telephone}
+                    onChangeText={(text) => {
+                      setTelephone(text);
+                      if (errors.telephone) setErrors({ ...errors, telephone: "" });
+                    }}
+                    keyboardType="phone-pad"
+                  />
+                </View>
+                {errors.telephone ? <Text style={styles.errorText}>{errors.telephone}</Text> : null}
+              </View>
+
+              {/* Address */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Home Address</Text>
+                <View style={[styles.inputContainer, errors.address ? styles.inputError : null]}>
+                  <Ionicons name="home-outline" size={20} color={COLORS.primary} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Street, City"
+                    placeholderTextColor={COLORS.textMuted}
+                    value={address}
+                    onChangeText={(text) => {
+                      setAddress(text);
+                      if (errors.address) setErrors({ ...errors, address: "" });
+                    }}
+                  />
+                </View>
+                {errors.address ? <Text style={styles.errorText}>{errors.address}</Text> : null}
+              </View>
+
+              {/* Password */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Password</Text>
+                <View style={[styles.inputContainer, errors.password ? styles.inputError : null]}>
+                  <Ionicons name="lock-closed-outline" size={20} color={COLORS.primary} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Min. 6 characters"
+                    placeholderTextColor={COLORS.textMuted}
+                    value={password}
+                    onChangeText={(text) => {
+                      setPassword(text);
+                      if (errors.password) setErrors({ ...errors, password: "" });
+                    }}
+                    secureTextEntry={!showPassword}
+                  />
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+                    <Ionicons name={showPassword ? "eye-outline" : "eye-off-outline"} size={20} color={COLORS.textMuted} />
+                  </TouchableOpacity>
+                </View>
+                {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
+              </View>
+
+              {/* Confirm Password */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Confirm Password</Text>
+                <View style={[styles.inputContainer, errors.confirmPassword ? styles.inputError : null]}>
+                  <Ionicons name="lock-closed-outline" size={20} color={COLORS.primary} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Repeat password"
+                    placeholderTextColor={COLORS.textMuted}
+                    value={confirmPassword}
+                    onChangeText={(text) => {
+                      setConfirmPassword(text);
+                      if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: "" });
+                    }}
+                    secureTextEntry={!showPassword}
+                  />
+                </View>
+                {errors.confirmPassword ? <Text style={styles.errorText}>{errors.confirmPassword}</Text> : null}
+              </View>
+
+              <TouchableOpacity style={styles.button} onPress={handleSignup} disabled={isLoading}>
+                {isLoading ? (
+                  <ActivityIndicator color={COLORS.white} />
+                ) : (
+                  <Text style={styles.buttonText}>Create Account</Text>
+                )}
+              </TouchableOpacity>
+
+              <View style={styles.footer}>
+                <Text style={styles.footerText}>Already have an account?</Text>
+                <Link href="/(auth)" asChild>
+                  <TouchableOpacity>
+                    <Text style={styles.link}>Sign In</Text>
+                  </TouchableOpacity>
+                </Link>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: COLORS.primary,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    backgroundColor: COLORS.background,
+  },
+  headerContainer: {
+    paddingHorizontal: 32,
+    paddingTop: Platform.OS === 'ios' ? 80 : 60,
+    paddingBottom: 32,
+    backgroundColor: COLORS.primary,
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "800",
+    color: COLORS.white,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "rgba(255,255,255,0.8)",
+  },
+  card: {
+    backgroundColor: COLORS.background,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    paddingHorizontal: 32,
+    paddingTop: 40,
+    paddingBottom: 40,
+    flex: 1,
+  },
+  formContainer: {
+    width: "100%",
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: COLORS.textPrimary,
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingHorizontal: 16,
+    height: 52,
+  },
+  inputError: {
+    borderColor: COLORS.error,
+    backgroundColor: COLORS.error + "05",
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    color: COLORS.textPrimary,
+    fontWeight: "500",
+  },
+  eyeIcon: {
+    padding: 8,
+  },
+  dropdown: {
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.border,
+    borderRadius: 16,
+    height: 52,
+  },
+  dropdownContainer: {
+    borderColor: COLORS.border,
+    borderRadius: 16,
+    backgroundColor: COLORS.white,
+    elevation: 5,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  dropdownText: {
+    fontSize: 15,
+    color: COLORS.textPrimary,
+    fontWeight: "500",
+  },
+  dropdownPlaceholder: {
+    color: COLORS.textMuted,
+  },
+  button: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 16,
+    height: 56,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 16,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  buttonText: {
+    color: COLORS.white,
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 24,
+    marginBottom: 20,
+  },
+  footerText: {
+    color: COLORS.textSecondary,
+    fontSize: 15,
+    marginRight: 6,
+  },
+  link: {
+    color: COLORS.primary,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  errorText: {
+    color: COLORS.error,
+    fontSize: 12,
+    marginTop: 6,
+    marginLeft: 4,
+    fontWeight: "600",
+  },
+});
