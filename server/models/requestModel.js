@@ -32,8 +32,36 @@ const getRequestsByUserId = (userId, callback) => {
   });
 };
 
+const getRequestsByCollectorId = (collectorId, callback) => {
+  const sql = `
+    SELECT pr.*, u.username AS customer_name, u.email AS customer_email, u.telephone AS customer_telephone
+    FROM pickup_requests pr
+    JOIN users u ON pr.user_id = u.id
+    WHERE pr.collector_id = ? AND pr.status IN ('Assigned', 'completed')
+    ORDER BY pr.create_date DESC
+  `;
+  db.all(sql, [collectorId], (err, rows) => {
+    if (err) return callback(err);
+    callback(null, rows);
+  });
+};
+
+const completeRequestByCollector = (requestId, collectorId, callback) => {
+  const sql = `
+    UPDATE pickup_requests
+    SET status = 'completed'
+    WHERE id = ? AND collector_id = ? AND status = 'Assigned'
+  `;
+  db.run(sql, [requestId, collectorId], function (err) {
+    if (err) return callback(err);
+    callback(null, { changes: this.changes });
+  });
+};
+
 module.exports = {
   insertRequest,
   getRequestsByUserId,
+  getRequestsByCollectorId,
+  completeRequestByCollector,
   generateRequestCode,
 };
