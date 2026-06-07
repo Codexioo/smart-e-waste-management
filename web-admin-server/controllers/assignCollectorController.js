@@ -28,10 +28,17 @@ const assignCollector = (req, res) => {
     return res.status(400).json({ error: 'Missing requestId or collectorId' });
   }
 
-  const sql = `UPDATE pickup_requests SET collector_id = ?, status = 'Assigned' WHERE id = ?`;
+  const sql = `
+    UPDATE pickup_requests
+    SET collector_id = ?, status = 'Assigned'
+    WHERE id = ? AND status = 'accepted'
+  `;
 
   db.run(sql, [collectorId, requestId], function (err) {
     if (err) return res.status(500).json({ error: err.message });
+    if (this.changes === 0) {
+      return res.status(404).json({ error: 'Request not found or already assigned' });
+    }
     res.json({ message: 'Collector assigned successfully' });
   });
 };
