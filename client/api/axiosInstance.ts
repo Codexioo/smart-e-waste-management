@@ -1,15 +1,29 @@
-// client/api/axiosInstance.ts
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
-const baseURL = 'http://192.168.1.6:3001';
+const getApiBaseUrl = (): string => {
+  const hostUri = Constants.expoConfig?.hostUri;
+  if (hostUri) {
+    const host = hostUri.split(':')[0];
+    return `http://${host}:3001`;
+  }
+
+  if (Platform.OS === 'android') {
+    return 'http://10.0.2.2:3001';
+  }
+
+  return 'http://localhost:3001';
+};
+
+const baseURL = getApiBaseUrl();
 
 const axiosInstance = axios.create({
   baseURL,
-  timeout: 5000,
+  timeout: 15000,
 });
 
-// ✅ Attach token to every request
 axiosInstance.interceptors.request.use(async (config) => {
   const token = await AsyncStorage.getItem('token');
   if (token) {
