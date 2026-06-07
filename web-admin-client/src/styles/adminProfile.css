@@ -1,98 +1,146 @@
 .admin-profile-wrapper {
-    background: #f4faf5;
-    padding: 30px;
-    border-radius: 12px;
-    max-width: 600px;
-    margin: 40px auto;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  }
-  
-  .admin-profile-title {
-    font-size: 28px;
-    color: #00a52c;
-    font-weight: bold;
-    margin-bottom: 30px;
-    text-align: center;
-  }
-  
-  .admin-label {
-    font-weight: 600;
-    margin-top: 20px;
-    margin-bottom: 6px;
-    display: block;
-    color: #1a3d1a;
-  }
-  
-  input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #c8e6c9;
-    background: #f4faf5;
-    border-radius: 8px;
-    font-size: 14px;
-  }
-  
-  .admin-profile-buttons {
-    display: flex;
-    gap: 12px;
-    margin-top: 30px;
-    justify-content: space-between;
-  }
-  
-  button {
-    padding: 12px 20px;
-    border-radius: 8px;
-    background: #00a52c;
-    color: white;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-  }
-  
-  button.danger {
-    background: red;
-  }
-  
-  button:hover {
-    opacity: 0.9;
-  }
+  background-color: var(--surface);
+  border-radius: 24px;
+  padding: 48px;
+  border: 1px solid var(--border);
+  box-shadow: var(--card-shadow);
+  max-width: 700px;
+  margin: 0 auto;
+}
 
-  .image-section {
-    margin: 10px 0;
-  }
+.admin-profile-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 40px;
+  text-align: center;
+  letter-spacing: -0.5px;
+}
 
-  .admin-avatar-preview {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #ccc;
-    margin-bottom: 10px;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  
-  .image-edit-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    align-items: center;
-  }
-  
-  .upload-btn {
-    color: #2a6fdb;
-    text-decoration: underline;
-    cursor: pointer;
-  }
-  
-  .remove-btn {
-    background-color: transparent;
-    color: red;
-    border: none;
-    cursor: pointer;
-  }
-  
-  
-  
+.image-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.admin-avatar-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 40px;
+  object-fit: cover;
+  border: 4px solid var(--background);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.image-edit-buttons {
+  display: flex;
+  gap: 16px;
+}
+
+.upload-btn {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 8px 16px;
+  background-color: rgba(34, 197, 94, 0.1);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.upload-btn:hover {
+  background-color: var(--primary);
+  color: white;
+}
+
+.remove-btn {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--error);
+  cursor: pointer;
+  padding: 8px 16px;
+  background-color: rgba(239, 68, 68, 0.1);
+  border-radius: 10px;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.remove-btn:hover {
+  background-color: var(--error);
+  color: white;
+}
+
+.admin-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  margin-left: 4px;
+  margin-top: 20px;
+}
+
+.admin-profile-wrapper input {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.admin-profile-wrapper input:focus {
+  border-color: var(--primary);
+  background-color: var(--surface);
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+}
+
+.admin-profile-wrapper input:disabled {
+  background-color: var(--background);
+  color: var(--text-secondary);
+  border-color: transparent;
+  cursor: not-allowed;
+}
+
+.admin-profile-buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 48px;
+}
+
+.admin-profile-buttons button {
+  flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.admin-profile-buttons button:not(.danger) {
+  background-color: var(--primary);
+  color: white;
+}
+
+.admin-profile-buttons button:not(.danger):hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.admin-profile-buttons button.danger {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+}
+
+.admin-profile-buttons button.danger:hover {
+  background-color: var(--error);
+  color: white;
+}
