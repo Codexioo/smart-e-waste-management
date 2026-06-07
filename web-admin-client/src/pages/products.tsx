@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "../api/axiosInstance";
 import "../styles/products.css";
+import { MdSearch, MdAdd, MdEdit, MdDelete, MdCloudUpload, MdClose } from 'react-icons/md';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -101,7 +102,6 @@ export default function ProductsPage() {
       price: parseFloat(form.price),
       stock_quantity: parseInt(form.stock_quantity),
       min_level_required: form.min_level_required
-
     };
 
     if (editProduct) {
@@ -133,27 +133,37 @@ export default function ProductsPage() {
 
   return (
     <div className="admin-requests">
-      <h2 className="page-title">Product Management</h2>
+      <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <h2 className="page-title" style={{ marginBottom: 0 }}>Product Inventory</h2>
+        <div className="stats-badge" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: 'var(--secondary)', padding: '8px 16px', borderRadius: '12px', fontWeight: 700, fontSize: '14px' }}>
+          Total Products: {products.length}
+        </div>
+      </div>
 
       <div className="search-filter">
-        <input
-          placeholder="Search by product name..."
-          value={search}
-          onChange={(e) => filter(e.target.value)}
-        />
-        <button className="btn-approve" onClick={openAdd}>
-          Add Product
+        <div style={{ position: 'relative', flex: 1 }}>
+          {React.createElement(MdSearch as any, { style: { position: 'absolute', left: 12, top: 14, color: '#94a3b8' }, size: 20 })}
+          <input
+            placeholder="Search products..."
+            value={search}
+            onChange={(e) => filter(e.target.value)}
+            style={{ paddingLeft: 40 }}
+          />
+        </div>
+        <button className="btn-add-product" onClick={openAdd}>
+          {React.createElement(MdAdd as any, { size: 20 })}
+          <span>Add New Product</span>
         </button>
       </div>
 
       <table className="request-table">
         <thead>
           <tr>
-            <th>Image</th>
-            <th>Name</th>
-            <th>Price</th>
+            <th>Preview</th>
+            <th>Product Name</th>
+            <th>Price (Points)</th>
             <th>Stock</th>
-            <th>Level</th>
+            <th>Min. Level</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -169,10 +179,14 @@ export default function ProductsPage() {
                   onClick={() => setPreviewImage(p.product_image)}
                 />
               </td>
-              <td>{p.product_name}</td>
-              <td>{p.price}</td>
+              <td style={{ fontWeight: 700 }}>{p.product_name}</td>
+              <td style={{ fontWeight: 700, color: 'var(--primary)' }}>{p.price}</td>
               <td>{p.stock_quantity}</td>
-              <td>{p.min_level_required}</td>
+              <td>
+                <span className="badge accepted" style={{ fontSize: '10px' }}>
+                  {p.min_level_required}
+                </span>
+              </td>
               <td>
                 <select
                   className="status-select"
@@ -185,12 +199,14 @@ export default function ProductsPage() {
                 </select>
               </td>
               <td>
-                <button className="btn-approve" onClick={() => openEdit(p)}>
-                  Edit
-                </button>
-                <button className="btn-reject" onClick={() => deleteProduct(p)}>
-                  Delete
-                </button>
+                <div className="button-group">
+                  <button className="edit-btn" onClick={() => openEdit(p)}>
+                    {React.createElement(MdEdit as any, { size: 16 })}
+                  </button>
+                  <button className="delete-btn" onClick={() => deleteProduct(p)}>
+                    {React.createElement(MdDelete as any, { size: 16 })}
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
@@ -200,88 +216,103 @@ export default function ProductsPage() {
       {addMode && (
         <div className="popup-overlay">
           <div className="popup">
-            <h3>{editProduct ? "Edit Product" : "Add Product"}</h3>
+            <div className="popup-header">
+              <h3>{editProduct ? "Edit Product" : "Add New Product"}</h3>
+              <button onClick={closePopup} className="close-btn">
+                {React.createElement(MdClose as any, { size: 24 })}
+              </button>
+            </div>
             <form onSubmit={handleSubmit}>
-              <label>Product Name</label>
-              <input
-                name="product_name"
-                value={form.product_name}
-                onChange={handleChange}
-                required
-              />
+              <div className="form-grid">
+                <div className="form-group full-width">
+                  <label>Product Name</label>
+                  <input
+                    name="product_name"
+                    value={form.product_name}
+                    onChange={handleChange}
+                    required
+                    placeholder="e.g. Eco-friendly Water Bottle"
+                  />
+                </div>
 
-              <label>Description</label>
-              <textarea
-                name="product_desc"
-                value={form.product_desc}
-                onChange={handleChange}
-              />
+                <div className="form-group full-width">
+                  <label>Description</label>
+                  <textarea
+                    name="product_desc"
+                    value={form.product_desc}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="Brief product description..."
+                  />
+                </div>
 
-              <label>Price</label>
-              <input
-                name="price"
-                type="number"
-                value={form.price}
-                onChange={handleChange}
-                required
-              />
+                <div className="form-group">
+                  <label>Price (Points)</label>
+                  <input
+                    name="price"
+                    type="number"
+                    value={form.price}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Stock Quantity</label>
+                  <input
+                    name="stock_quantity"
+                    type="number"
+                    value={form.stock_quantity}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
 
-              <label>Stock Quantity</label>
-              <input
-                name="stock_quantity"
-                type="number"
-                value={form.stock_quantity}
-                onChange={handleChange}
-                required
-              />
+                <div className="form-group full-width">
+                  <label>Minimum Level Required</label>
+                  <select
+                    name="min_level_required"
+                    value={form.min_level_required}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select Level</option>
+                    {[
+                      "Bronze I", "Bronze II", "Silver I", "Silver II",
+                      "Gold I", "Gold II", "Platinum I", "Platinum II",
+                      "Diamond", "Eco Legend",
+                    ].map((level) => (
+                      <option key={level} value={level}>{level}</option>
+                    ))}
+                  </select>
+                </div>
 
-              <label>Minimum Level Required</label>
-              <select
-                name="min_level_required"
-                value={form.min_level_required}
-                onChange={handleChange}
-                required
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  fontSize: "14px",
-                  marginTop: "5px",
-                  borderRadius: "12px",
-                  border: "1px solid #ccc",
-                }}
-              >
-                <option value="">Select Level</option>
-                {[
-                  "Bronze I",
-                  "Bronze II",
-                  "Silver I",
-                  "Silver II",
-                  "Gold I",
-                  "Gold II",
-                  "Platinum I",
-                  "Platinum II",
-                  "Diamond",
-                  "Eco Legend",
-                ].map((level) => (
-                  <option key={level} value={level}>
-                    {level}
-                  </option>
-                ))}
-              </select>
+                <div className="form-group full-width">
+                  <label>Product Image</label>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImage} 
+                    id="file-upload"
+                    style={{ display: 'none' }}
+                  />
+                  <label htmlFor="file-upload" className="upload-area">
+                    <div className="upload-icon">
+                      {React.createElement(MdCloudUpload as any, { size: 24 })}
+                    </div>
+                    <span className="upload-text">
+                      {imageFile ? imageFile.name : "Click to upload product image"}
+                    </span>
+                  </label>
+                  {previewUrl && <img src={previewUrl} alt="preview" className="preview-img" />}
+                </div>
+              </div>
 
-              <label>Image</label>
-              <input type="file" accept="image/*" onChange={handleImage} />
-              {previewUrl && <img src={previewUrl} alt="preview" />}
-
-              <div style={{ marginTop: "15px" }}>
-                <button type="submit" className="btn-approve">
-                  {editProduct ? "Update" : "Add"}
+              <div className="modal-actions">
+                <button type="submit" className="btn-submit">
+                  {editProduct ? "Update Product" : "Create Product"}
                 </button>
-                <button
-                  type="button"
-                  className="btn-reject"
-                  onClick={closePopup}
-                >
+                <button type="button" className="btn-cancel" onClick={closePopup}>
                   Cancel
                 </button>
               </div>
@@ -291,10 +322,7 @@ export default function ProductsPage() {
       )}
 
       {previewImage && (
-        <div
-          className="image-preview-modal"
-          onClick={() => setPreviewImage("")}
-        >
+        <div className="image-preview-modal" onClick={() => setPreviewImage("")}>
           <img src={previewImage} alt="full" />
         </div>
       )}

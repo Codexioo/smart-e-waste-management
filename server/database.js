@@ -49,12 +49,20 @@ db.run(`
     latitude REAL,
     longitude REAL,
     user_id INTEGER NOT NULL,
-    FOREIGN KEY(user_id) REFERENCES users(id)
+    collector_id INTEGER,
+    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(collector_id) REFERENCES users(id)
   )
 `, (err) => {
   if (err) console.error('❌ Error creating pickup_requests table:', err);
   else console.log('✅ Table pickup_requests is ready');
 });
+
+  db.run(`ALTER TABLE pickup_requests ADD COLUMN collector_id INTEGER REFERENCES users(id)`, (err) => {
+    if (err && !err.message.includes('duplicate column')) {
+      console.error('❌ Error adding collector_id column:', err);
+    }
+  });
 
   // WASTE COLLECTIONS
   db.run(`
