@@ -1,83 +1,141 @@
 .dashboard-wrapper {
-    padding: 40px;
-    font-family: 'Inter', 'Segoe UI', sans-serif;
-    background-color: #f6f8fa;
-    min-height: 100vh;
-    color: #1f2937;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+.stat-card {
+  background-color: var(--surface);
+  padding: 24px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.3s ease;
+  box-shadow: var(--card-shadow);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.green .stat-icon { background-color: rgba(34, 197, 94, 0.1); color: #22c55e; }
+.blue .stat-icon { background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.amber .stat-icon { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.indigo .stat-icon { background-color: rgba(99, 102, 241, 0.1); color: #6366f1; }
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.stat-trend {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
   }
-  
-  .dashboard-title {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 6px;
-  }
-  
-  .dashboard-subtitle {
-    font-size: 14px;
-    color: #6b7280;
-    margin-bottom: 30px;
-  }
-  
-  .dashboard-cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 24px;
-    margin-bottom: 48px;
-  }
-  
-  .dashboard-card {
-    flex: 1;
-    min-width: 220px;
-    padding: 24px;
-    border-radius: 18px;
-    background: white;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    transition: all 0.2s ease;
-    border: 1px solid #e5e7eb;
-  }
-  
-  .dashboard-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
-  }
-  
-  .dashboard-card .value {
-    font-size: 36px;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-  
-  .dashboard-card .label {
-    font-size: 14px;
-    color: #6b7280;
-  }
-  
-  .green .value {
-    color: #10b981;
-  }
-  
-  .blue .value {
-    color: #3b82f6;
-  }
-  
-  .gray .value {
-    color: #6b7280;
-  }
-  
-  .chart-container {
-    background: white;
-    padding: 30px 40px;
-    border-radius: 18px;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
-    border: 1px solid #e5e7eb;
-  }
-  
-  .chart-container h3 {
-    font-size: 20px;
-    margin-bottom: 20px;
-    font-weight: 600;
-    color: #1f2937;
-  }
+}
+
+.chart-card {
+  background-color: var(--surface);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+}
+
+.chart-header {
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chart-header h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.chart-header p {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.chart-body {
+  padding: 24px;
+}
+
+.activity-list {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.activity-item .time {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot.green { background-color: #22c55e; }
+.dot.blue { background-color: #3b82f6; }
+.dot.amber { background-color: #f59e0b; }

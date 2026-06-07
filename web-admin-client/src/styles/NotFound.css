@@ -1,25 +1,70 @@
-.not-found-page {
-    text-align: center;
-    padding: 80px;
-  }
-  
-  .not-found-page h1 {
-    font-size: 36px;
-    margin-bottom: 16px;
-  }
-  
-  .not-found-page p {
-    font-size: 18px;
-    color: gray;
-    margin-bottom: 24px;
-  }
-  
-  .not-found-page button {
-    padding: 10px 20px;
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  
+.not-found-wrapper {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background);
+  padding: 20px;
+}
+
+.not-found-content {
+  text-align: center;
+  max-width: 500px;
+  background: var(--surface);
+  padding: 60px 40px;
+  border-radius: 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border);
+}
+
+.not-found-icon {
+  color: var(--error);
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.not-found-title {
+  font-size: 80px;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+.not-found-subtitle {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.not-found-text {
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.not-found-btn {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.not-found-btn:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(34, 197, 94, 0.2);
+}

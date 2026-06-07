@@ -11,4 +11,10 @@ const db = new sqlite3.Database(dbPath, (err) => {
   }
 });
 
+db.run(`ALTER TABLE pickup_requests ADD COLUMN collector_id INTEGER REFERENCES users(id)`, (err) => {
+  if (err && !err.message.includes('duplicate column')) {
+    console.error('❌ Error adding collector_id column:', err);
+  }
+});
+
 module.exports = db;

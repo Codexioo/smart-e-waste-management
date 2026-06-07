@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios from '../api/axiosInstance';
 import Modal from 'react-modal';
 import Select from 'react-select';
 import '../styles/requests.css';
@@ -7,6 +7,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { MdSearch, MdFilterList, MdRefresh, MdFileDownload, MdVisibility, MdCheck, MdClose, MdEdit } from 'react-icons/md';
 
 Modal.setAppElement('#root');
 
@@ -36,10 +37,10 @@ const Requests = () => {
   const [status, setStatus] = useState('');
 
   const wasteOptions = [
+    { value: 'Electronic Waste', label: 'Electronic Waste' },
+    { value: 'Batteries', label: 'Batteries' },
     { value: 'Plastic', label: 'Plastic' },
-    { value: 'Glass', label: 'Glass' },
     { value: 'Metal', label: 'Metal' },
-    { value: 'Paper', label: 'Paper' },
   ];
 
   const sriLankanDistricts = [
@@ -69,17 +70,17 @@ const Requests = () => {
   }
 
   useEffect(() => {
-    axios.get('http://localhost:9091/api/requests')
+    axios.get('/requests')
       .then(res => setRequests(res.data))
       .catch(err => console.error('❌ Error fetching data:', err));
   }, []);
 
   const handleStatusUpdate = async (id: number, status: string) => {
     try {
-      await axios.put(`http://localhost:9091/api/requests/${id}/status`, { status });
+      await axios.put(`/requests/${id}/status`, { status });
       setRequests(prev => prev.map(r => (r.id === id ? { ...r, status } : r)));
       toast.success(`Request ${status === 'accepted' ? 'approved' : 'rejected'}! 🎉`, {
-        position: 'top-right', autoClose: 2000, style: { marginTop: '50px' }
+        position: 'top-right', autoClose: 2000
       });
       setTimeout(() => setSelectedRequest(null), 2000);
     } catch (err) {
@@ -103,7 +104,7 @@ const Requests = () => {
         ? editable.waste_types.map((w: any) => w.value).join(',')
         : editable.waste_types;
 
-      await axios.put(`http://localhost:9091/api/requests/${selectedRequest.id}/edit`, {
+      await axios.put(`/requests/${selectedRequest.id}/edit`, {
         address: editable.address,
         district: editable.district,
         city: editable.city,
@@ -135,12 +136,11 @@ const Requests = () => {
 
   const handleDownloadPickupReport = async () => {
     try {
-      const response = await axios.get("http://localhost:9091/api/report/pickup-report");
+      const response = await axios.get("/report/pickup-report");
       const pickupHistory = response.data.pickupReport;
   
       const tableRows = pickupHistory.length > 0
         ? pickupHistory.map((item: PickupReportItem) => `
-
             <tr>
               <td>${item.request_code}</td>
               <td>${item.address}, ${item.district}, ${item.city}</td>
@@ -152,16 +152,20 @@ const Requests = () => {
         : "<tr><td colspan='5'>No pickup records</td></tr>";
   
       const reportHtml = `
-        <div id="report-content" style="padding: 20px; font-family: Arial;">
-          <h2>Smart E-Waste – Pickup Report</h2>
-          <table border="1" cellspacing="0" cellpadding="8" style="width:100%;">
+        <div id="report-content" style="padding: 40px; font-family: 'Inter', sans-serif; color: #0f172a;">
+          <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
+            <div style="width: 40px; height: 40px; background-color: #22c55e; border-radius: 8px;"></div>
+            <h1 style="font-size: 24px; font-weight: 800; margin: 0;">EcoSmart Pickup Report</h1>
+          </div>
+          <p style="color: #64748b; margin-bottom: 20px;">Generated on: ${new Date().toLocaleDateString()}</p>
+          <table border="0" cellspacing="0" cellpadding="12" style="width:100%; border-collapse: collapse;">
             <thead>
-              <tr>
-                <th>Request Code</th>
-                <th>Address</th>
-                <th>Waste Types</th>
-                <th>Date</th>
-                <th>Status</th>
+              <tr style="background-color: #f8fafc; text-align: left;">
+                <th style="border-bottom: 2px solid #e2e8f0; font-weight: 700;">Code</th>
+                <th style="border-bottom: 2px solid #e2e8f0; font-weight: 700;">Location</th>
+                <th style="border-bottom: 2px solid #e2e8f0; font-weight: 700;">Waste Types</th>
+                <th style="border-bottom: 2px solid #e2e8f0; font-weight: 700;">Date</th>
+                <th style="border-bottom: 2px solid #e2e8f0; font-weight: 700;">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -171,7 +175,6 @@ const Requests = () => {
         </div>
       `;
   
-      // Create a temporary element for rendering
       const container = document.createElement('div');
       container.innerHTML = reportHtml;
       container.style.position = 'fixed';
@@ -179,17 +182,16 @@ const Requests = () => {
       document.body.appendChild(container);
   
       const element = container.querySelector('#report-content') as HTMLElement;
-      const canvas = await html2canvas(element);
+      const canvas = await html2canvas(element, { scale: 2 });
   
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
       const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pageWidth;
+      const pdfWidth = pageWidth - 20;
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
   
-      pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, pdfHeight);
+      pdf.addImage(imgData, 'PNG', 10, 10, pdfWidth, pdfHeight);
       pdf.save('pickup-report.pdf');
   
       document.body.removeChild(container);
@@ -198,21 +200,32 @@ const Requests = () => {
       console.error("Download error:", error);
     }
   };
-  
-  
+
   return (
     <div className="admin-requests">
-      <h2 className="page-title">Pickup Requests</h2>
+      <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <h2 className="page-title" style={{ marginBottom: 0 }}>Pickup Requests</h2>
+        <div className="stats-badge" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: 'var(--secondary)', padding: '8px 16px', borderRadius: '12px', fontWeight: 700, fontSize: '14px' }}>
+          Total Requests: {requests.length}
+        </div>
+      </div>
 
-      {/* Filters */}
       <div className="filters">
-        <input placeholder="Search by Request Code" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <div style={{ position: 'relative', minWidth: '200px' }}>
+          {React.createElement(MdSearch as any, { style: { position: 'absolute', left: 12, top: 14, color: '#94a3b8' }, size: 20 })}
+          <input 
+            placeholder="Search code..." 
+            value={search} 
+            onChange={(e) => setSearch(e.target.value)} 
+            style={{ paddingLeft: 40 }}
+          />
+        </div>
         <input type="date" value={date} onChange={e => setDate(e.target.value)} />
         <select value={district} onChange={e => setDistrict(e.target.value)}>
           <option value="">All Districts</option>
           {sriLankanDistricts.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
         </select>
-        <select value={city} onChange={e => setCity(e.target.value)}>
+        <select value={city} onChange={e => setCity(e.target.value)} disabled={!district}>
           <option value="">All Cities</option>
           {(citiesByDistrict[district] || []).map(c => <option key={c} value={c}>{c}</option>)}
         </select>
@@ -224,23 +237,24 @@ const Requests = () => {
         </select>
         <button className="reset-btn" onClick={() => {
           setSearch(''); setDistrict(''); setCity(''); setDate(''); setStatus('');
-        }}>Reset Filters</button>
+        }}>
+          {React.createElement(MdRefresh as any, { size: 20 })}
+        </button>
 
-    <button className="download-btn" onClick={handleDownloadPickupReport}>
-    Download Pickup Report
-    </button>
+        <button className="download-btn" onClick={handleDownloadPickupReport}>
+          {React.createElement(MdFileDownload as any, { size: 20 })}
+          <span>Export PDF</span>
+        </button>
       </div>
 
-      {/* Table */}
       <table className="request-table">
         <thead>
           <tr>
-            <th>Request ID</th>
+            <th>Code</th>
             <th>Date</th>
-            <th>User Name</th>
+            <th>Customer</th>
             <th>District</th>
             <th>City</th>
-            <th>Address</th>
             <th>Status</th>
             <th>Action</th>
           </tr>
@@ -248,25 +262,27 @@ const Requests = () => {
         <tbody>
           {filtered.map(req => (
             <tr key={req.id}>
-              <td>{req.request_code}</td>
+              <td style={{ fontWeight: 700 }}>{req.request_code}</td>
               <td>{req.create_date.split('T')[0]}</td>
-              <td>{req.user_name}</td>
+              <td style={{ fontWeight: 600 }}>{req.user_name}</td>
               <td>{req.district}</td>
               <td>{req.city}</td>
-              <td>{req.address}</td>
               <td><span className={`badge ${req.status}`}>{req.status}</span></td>
-              <td><button className="view-btn" onClick={() => {
-                setSelectedRequest(req);
-                setEditMode(false);
-                const selectedWasteTypes = req.waste_types?.split(',').map(value => wasteOptions.find(opt => opt.value === value)).filter(Boolean);
-                setEditable({ ...req, waste_types: selectedWasteTypes?.map(w => w?.value).join(',') || '' });
-              }}>View</button></td>
+              <td>
+                <button className="view-btn" onClick={() => {
+                  setSelectedRequest(req);
+                  setEditMode(false);
+                  const selectedWasteTypes = req.waste_types?.split(',').map(value => wasteOptions.find(opt => opt.value === value)).filter(Boolean);
+                  setEditable({ ...req, waste_types: selectedWasteTypes?.map(w => w?.value).join(',') || '' });
+                }}>
+                  {React.createElement(MdVisibility as any, { size: 16 })}
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/* Modal */}
       <Modal
         isOpen={!!selectedRequest}
         onRequestClose={() => setSelectedRequest(null)}
@@ -276,19 +292,18 @@ const Requests = () => {
       >
         {selectedRequest && (
           <>
-            <h2>Request Details</h2>
+            <h2>Request Details #{selectedRequest.request_code}</h2>
             <div className="modal-details">
-              <p><strong>Status:</strong> {selectedRequest.status}</p>
-              <p><strong>Date:</strong> {selectedRequest.create_date.split('T')[0]}</p>
-              <p><strong>Request Code:</strong> {selectedRequest.request_code}</p>
-              <p><strong>Name:</strong> {selectedRequest.user_name}</p>
-              <p><strong>Email:</strong> {selectedRequest.email}</p>
-              <p><strong>Phone:</strong> {selectedRequest.telephone}</p>
+              <p><strong>Status</strong> <span className={`badge ${selectedRequest.status}`}>{selectedRequest.status}</span></p>
+              <p><strong>Created On</strong> {selectedRequest.create_date.split('T')[0]}</p>
+              <p><strong>Customer Name</strong> {selectedRequest.user_name}</p>
+              <p><strong>Email Address</strong> {selectedRequest.email}</p>
+              <p><strong>Phone Number</strong> {selectedRequest.telephone}</p>
 
               {editMode ? (
                 <>
-                  <div className="form-field">
-                    <label><strong>Address:</strong></label>
+                  <div>
+                    <label><strong>Address</strong></label>
                     <input
                       type="text"
                       className="input-text"
@@ -296,7 +311,8 @@ const Requests = () => {
                       onChange={(e) => handleEditChange('address', e.target.value)}
                     />
                   </div>
-                  <p><strong>District:</strong>
+                  <div>
+                    <label><strong>District</strong></label>
                     <select
                       className="dropdown-text"
                       value={editable.district || ''}
@@ -311,8 +327,9 @@ const Requests = () => {
                         <option key={d.value} value={d.value}>{d.label}</option>
                       ))}
                     </select>
-                  </p>
-                  <p><strong>City:</strong>
+                  </div>
+                  <div>
+                    <label><strong>City</strong></label>
                     <select
                       className="dropdown-text"
                       value={editable.city || ''}
@@ -324,41 +341,58 @@ const Requests = () => {
                         <option key={city} value={city}>{city}</option>
                       ))}
                     </select>
-                  </p>
-                  <p><strong>Waste Types:</strong></p>
-                  <Select
-                    isMulti
-                    options={wasteOptions}
-                    classNamePrefix="select"
-                    className="dropdown-text"
-                    value={wasteOptions.filter(opt => (editable.waste_types || '').split(',').includes(opt.value))}
-                    onChange={(selectedOptions) => {
-                      const selectedValues = selectedOptions.map((opt: any) => opt.value).join(',');
-                      handleEditChange('waste_types', selectedValues);
-                    }}
-                  />
+                  </div>
+                  <div>
+                    <label><strong>Waste Types</strong></label>
+                    <Select
+                      isMulti
+                      options={wasteOptions}
+                      classNamePrefix="select"
+                      className="dropdown-text"
+                      value={wasteOptions.filter(opt => (editable.waste_types || '').split(',').includes(opt.value))}
+                      onChange={(selectedOptions) => {
+                        const selectedValues = selectedOptions.map((opt: any) => opt.value).join(',');
+                        handleEditChange('waste_types', selectedValues);
+                      }}
+                    />
+                  </div>
                 </>
               ) : (
                 <>
-                  <p><strong>Address:</strong> {selectedRequest.address}</p>
-                  <p><strong>District:</strong> {selectedRequest.district}</p>
-                  <p><strong>City:</strong> {selectedRequest.city}</p>
-                  <p><strong>Waste Types:</strong> {selectedRequest.waste_types}</p>
+                  <p><strong>Full Address</strong> {selectedRequest.address}</p>
+                  <p><strong>District / City</strong> {selectedRequest.district} / {selectedRequest.city}</p>
+                  <p><strong>Waste Categories</strong> {selectedRequest.waste_types}</p>
                 </>
               )}
             </div>
 
             <div className="modal-actions">
               {editMode ? (
-                <button className="btn-approve" onClick={handleSaveEdit}>Save</button>
+                <button className="btn-approve" onClick={handleSaveEdit}>
+                  {React.createElement(MdCheck as any, { size: 18 })}
+                  <span>Save Changes</span>
+                </button>
               ) : (
                 <>
-                  <button className="btn-approve" onClick={() => handleStatusUpdate(selectedRequest.id, 'accepted')}>Approve</button>
-                  <button className="btn-reject" onClick={() => handleStatusUpdate(selectedRequest.id, 'rejected')}>Reject</button>
-                  <button className="btn-edit" onClick={handleEditClick}>Edit</button>
+                  {selectedRequest.status === 'pending' && (
+                    <>
+                      <button className="btn-approve" onClick={() => handleStatusUpdate(selectedRequest.id, 'accepted')}>
+                        {React.createElement(MdCheck as any, { size: 18 })}
+                        <span>Approve</span>
+                      </button>
+                      <button className="btn-reject" onClick={() => handleStatusUpdate(selectedRequest.id, 'rejected')}>
+                        {React.createElement(MdClose as any, { size: 18 })}
+                        <span>Reject</span>
+                      </button>
+                    </>
+                  )}
+                  <button className="btn-edit" onClick={handleEditClick}>
+                    {React.createElement(MdEdit as any, { size: 18 })}
+                    <span>Edit</span>
+                  </button>
                 </>
               )}
-              <button className="btn-cancel" onClick={() => setSelectedRequest(null)}>Cancel</button>
+              <button className="btn-cancel" onClick={() => setSelectedRequest(null)}>Close</button>
             </div>
           </>
         )}
