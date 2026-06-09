@@ -64,7 +64,7 @@ export default function Login() {
       if (role === "customer") {
         router.replace("/(tabs)/userdashboard");
       } else if (role === "collector") {
-        router.replace("/(auth)/collectordashboard");
+        router.replace("/(collector)/home");
       }
     } catch (error: any) {
       console.error("Login error:", error);
