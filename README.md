@@ -1,137 +1,173 @@
-# ♻️ Smart E-Waste System
+# Smart E-Waste Management
 
 ![Expo](https://img.shields.io/badge/Expo-React%20Native-blue)
 ![Node.js](https://img.shields.io/badge/Node.js-Backend-green)
 ![SQLite](https://img.shields.io/badge/SQLite-Database-lightgrey)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+
+A cross-platform system for electronic waste collection with role-based mobile apps for customers and collectors, plus a web admin portal for managing pickups, users, and rewards.
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Getting Started](#-getting-started)
-- [Running the Project](#-running-the-project)
-- [Admin Dashboard](#-admin-dashboard)
-- [Modules](#-key-modules)
-- [Team](#-team-members)
-- [License](#-license)
-
----
-
-## 🚀 Features
-
-- 🗓️ **Pickup Request System** – Schedule and manage e-waste collection via app.
-- 🏆 **Gamified Rewards & Levels** – Earn points, level up, and redeem real rewards.
-- 🧭 **Route Optimization** – Google Maps API for smart waste collection routing.
-- 📈 **Dashboards & Reporting** – Real-time data views for users, collectors, and admins.
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Running the Project](#running-the-project)
+- [User Roles](#user-roles)
+- [Team](#team)
 
 ---
 
-## 🛠 Tech Stack
+## Features
 
+### Customer (Mobile App)
+- Sign up / login with OTP verification
+- Request e-waste pickups with location and waste type selection
+- Track pickup status and history
+- Earn reward points and level up
+- In-app shop, cart, and orders
 
-|-------------|-------------------------|
-| Mobile App  | React Native (Expo)     |
-| Backend     | Node.js + Express       |
-| Database    | SQLite                  |
-| Web Admin   | React (Vite/CRA)        |
-| Maps/Routing| Google Maps API         |
+### Collector (Mobile App)
+- Dashboard with earnings, active pickups, and lifetime stats
+- Assigned pickups list with All / Pending / Completed filters
+- Pickup details with call customer, map, and notes
+- Update pickup status (start → collect weight → complete)
+- Performance metrics, achievements, and earnings history
 
+### Admin (Web Dashboard)
+- Manage users, pickup requests, and products
+- Assign collectors to pickup requests
+- View dashboard analytics and reports
 
 ---
 
-## ⚙️ Getting Started
+## Tech Stack
+
+| Layer          | Technology              |
+|----------------|-------------------------|
+| Mobile App     | React Native (Expo)     |
+| Mobile API     | Node.js + Express       |
+| Admin Frontend | React (Create React App)|
+| Admin API      | Node.js + Express       |
+| Database       | SQLite                  |
+| Auth           | JWT                     |
+| Maps           | react-native-maps       |
+
+---
+
+## Project Structure
+
+```
+smart-e-waste-management/
+├── client/              # Expo mobile app (customers & collectors)
+├── server/              # Main API for mobile app (port 3001)
+├── web-admin-client/    # Admin web UI (port 3000)
+└── web-admin-server/    # Admin API (port 9091)
+```
+
+---
+
+## Getting Started
 
 ### Prerequisites
 
-- Node.js (v18+ recommended)
-- Expo CLI: `npm install -g expo-cli`
-- Git
-- Android/iOS device or emulator
+- Node.js v18+
+- npm
+- iOS Simulator, Android Emulator, or a physical device with Expo Go
 
 ### Installation
 
 ```bash
-# Clone repository
-git clone https://github.com/yourusername/smart-ewaste-system.git
-cd smart-ewaste-system
+git clone https://github.com/Codexioo/smart-e-waste-management.git
+cd smart-e-waste-management
 
-# Setup backend
-cd server
-npm install
-
-# Setup mobile app
-cd ../client
-npm install
+cd server && npm install
+cd ../client && npm install
+cd ../web-admin-server && npm install
+cd ../web-admin-client && npm install
 ```
 
 ---
 
-## ▶️ Running the Project
+## Running the Project
 
-### Start Backend
+Run each service in a **separate terminal**.
+
+### 1. Mobile API (required for the app)
 
 ```bash
 cd server
-node server.js
-```
-
-### Start Mobile App
-
-```bash
-cd ../client
-npx expo start
-```
-
-Use **Expo Go** or an emulator to run the app.
-
----
-
-## 🖥 Admin Dashboard
-
-Admins manage pickups, collectors, and reports through a web portal.
-
-```bash
-# Start admin backend
-cd web-admin-server
-npm install
-node server.js
-
-# Start admin frontend
-cd ../web-admin-client
-npm install
 npm start
 ```
 
+Runs at **http://localhost:3001**
+
+### 2. Mobile App
+
+```bash
+cd client
+npx expo start
+```
+
+Then press **`i`** for iOS Simulator, **`a`** for Android Emulator, or scan the QR code with Expo Go.
+
+> Use iOS or Android — not web — for full functionality (maps, location, etc.).
+
+The app connects to the API automatically:
+- iOS Simulator → `127.0.0.1:3001`
+- Android Emulator → `10.0.2.2:3001`
+- Physical device → your computer's LAN IP on port 3001
+
+### 3. Admin API
+
+```bash
+cd web-admin-server
+node server.js
+```
+
+Runs at **http://localhost:9091**
+
+### 4. Admin Web Dashboard
+
+```bash
+cd web-admin-client
+npm start
+```
+
+Open **http://localhost:3000**
+
 ---
 
-## 📦 Key Modules
+## User Roles
 
+| Role      | Access                                      |
+|-----------|---------------------------------------------|
+| Customer  | Mobile app — request pickups, shop, rewards |
+| Collector | Mobile app — assigned pickups, earnings     |
+| Admin     | Web dashboard — manage system               |
 
-- 🏅 **Rewards, Levels & In-App Store**
-- 📍 **Google Maps Route Optimization**
-- 📲 **Pickup Request & Collector Assignment**
-- 📊 **Analytics & Reporting Tools**
+Sign up through the mobile app as a **customer** or **collector**. Admin accounts are managed separately in the admin system.
 
 ---
 
-## 👥 Team Members
+## Quick Reference
 
-- Rajapaksha R M S N R  
-- Rodrigo U M T H  
-- Perera W P M A N  
-- Bandara N G J C  
+| Service         | Folder              | Port |
+|-----------------|---------------------|------|
+| Mobile API      | `server/`           | 3001 |
+| Mobile App      | `client/`           | 8081 |
+| Admin API       | `web-admin-server/` | 9091 |
+| Admin Dashboard | `web-admin-client/` | 3000 |
+
+---
+
+## Team
+
+- Rajapaksha R M S N R
+- Rodrigo U M T H
+- Perera W P M A N
+- Bandara N G J C
 
 > Developed as part of the university curriculum (ITPM – 3rd Year, 2nd Semester)
-
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-Ready to take the future of e-waste recycling into your hands. ♻️
