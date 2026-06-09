@@ -3,24 +3,30 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
+const API_PORT = 3001;
+
 const getApiBaseUrl = (): string => {
+  if (Platform.OS === 'android') {
+    return `http://10.0.2.2:${API_PORT}`;
+  }
+
+  // iOS simulator shares the host machine — localhost is most reliable
+  if (Platform.OS === 'ios' && !Constants.isDevice) {
+    return `http://127.0.0.1:${API_PORT}`;
+  }
+
+  // Physical device: use the same LAN IP as the Expo dev server
   const hostUri = Constants.expoConfig?.hostUri;
   if (hostUri) {
     const host = hostUri.split(':')[0];
-    return `http://${host}:3001`;
+    return `http://${host}:${API_PORT}`;
   }
 
-  if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:3001';
-  }
-
-  return 'http://localhost:3001';
+  return `http://127.0.0.1:${API_PORT}`;
 };
 
-const baseURL = getApiBaseUrl();
-
 const axiosInstance = axios.create({
-  baseURL,
+  baseURL: getApiBaseUrl(),
   timeout: 15000,
 });
 

@@ -58,19 +58,46 @@ export default function Profile() {
           return;
         }
 
-        const response = await axios.get("/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const cachedUser = await getUser();
+        if (cachedUser) {
+          setName(cachedUser.username || "");
+          setEmail(cachedUser.email || "");
+          setTelephone(cachedUser.telephone || "");
+          setAddress(cachedUser.address || "");
+        }
 
+        const response = await axios.get("/profile");
         const user = response.data;
-        setName(user.username);
-        setEmail(user.email);
-        setTelephone(user.telephone);
-        setAddress(user.address);
-        setProfileImage(user.profile_image || ""); 
-      } catch (error) {
+
+        setName(user.username || "");
+        setEmail(user.email || "");
+        setTelephone(user.telephone || "");
+        setAddress(user.address || "");
+        setProfileImage(user.profile_image || "");
+
+        await setUser({ ...cachedUser, ...user });
+      } catch (error: any) {
         console.error("Profile load error:", error);
-        alert("Failed to load profile.");
+
+        const status = error?.response?.status;
+        if (status === 401 || status === 403) {
+          await clearStorage();
+          router.replace("/(auth)");
+          return;
+        }
+
+        const cachedUser = await getUser();
+        if (cachedUser?.username) {
+          Alert.alert(
+            "Offline mode",
+            "Could not reach the server. Showing your saved profile info."
+          );
+        } else {
+          Alert.alert(
+            "Failed to load profile",
+            "Make sure the main API server is running on port 3001, then try again."
+          );
+        }
       } finally {
         setIsProfileLoading(false);
       }
