@@ -1,0 +1,44 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Expo & React Native specific files
+.expo/
+.expo-shared/
+dist/
+web-build/
+*.expo
+*.expo-shared
+
+# IDE/Editor-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment files (Important for security)
+.env
+.env.local
+.env.development
+.env.production
+
+# SQLite database files
+*.sqlite
+*.sqlite3
+*.db
+database/
+
+# Logs & Cache
+logs
+*.log
+yarn-debug.log*
+yarn-error.log*
+metro-cache/
+.cache/
+tmp/
+
+# Ignore build folders
+android/app/build/
+ios/Pods/
+ios/build/

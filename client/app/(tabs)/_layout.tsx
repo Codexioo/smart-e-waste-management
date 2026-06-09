@@ -1,45 +1,52 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
-
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useEffect, useState } from "react";
+import { View, ActivityIndicator } from "react-native";
+import { Tabs, useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import BottomBar, { useBottomNavPadding } from "@/components/bottombar";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const router = useRouter();
+  const bottomPadding = useBottomNavPadding();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      const role = await AsyncStorage.getItem("role");
+      if (role === "collector") {
+        router.replace("/(collector)/home");
+        return;
+      }
+      setLoading(false);
+    };
+
+    fetchUserRole();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <Tabs
+      tabBar={(props) => <BottomBar tabProps={props} />}
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
+        tabBarStyle: {
+          position: "absolute",
+          backgroundColor: "transparent",
+          borderTopWidth: 0,
+          elevation: 0,
+        },
+        sceneStyle: { paddingBottom: bottomPadding },
+      }}
+    >
+      <Tabs.Screen name="userdashboard" />
+      <Tabs.Screen name="profileInfo" />
+      <Tabs.Screen name="settings" />
     </Tabs>
   );
 }
