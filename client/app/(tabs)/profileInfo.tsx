@@ -14,7 +14,7 @@ import { Ionicons, Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import axios from "../../api/axiosInstance";
 import useProtectedRoute from "@/hooks/useProtectedRoute";
-import { getToken } from "@/utils/storage";
+import { getToken, getUser, setUser as saveUser } from "@/utils/storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import COLORS from "@/constants/colors";
@@ -52,13 +52,20 @@ export default function ProfileInfo() {
             return;
           }
 
-          const response = await axios.get("/profile", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          const cachedUser = await getUser();
+          if (cachedUser) {
+            setUser(cachedUser as UserProfile);
+          }
 
+          const response = await axios.get("/profile");
           setUser(response.data);
+          await saveUser(response.data);
         } catch (error) {
           console.error("Profile load error:", error);
+          const cachedUser = await getUser();
+          if (cachedUser) {
+            setUser(cachedUser as UserProfile);
+          }
         } finally {
           setIsProfileLoading(false);
         }
