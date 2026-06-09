@@ -2,7 +2,6 @@ import React from "react";
 import {
   View,
   Text,
-  FlatList,
   Alert,
   TouchableOpacity,
   StyleSheet,
@@ -78,14 +77,12 @@ const SettingsScreen = () => {
         </View>
 
         <View style={styles.card}>
-          <FlatList
-            data={SETTINGS}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-          />
+          {SETTINGS.map((item, index) => (
+            <React.Fragment key={item.id}>
+              {renderItem({ item })}
+              {index < SETTINGS.length - 1 && <View style={styles.separator} />}
+            </React.Fragment>
+          ))}
         </View>
 
         <View style={styles.footer}>
