@@ -238,6 +238,8 @@ const Request = () => {
                     if (errors.district) setErrors({ ...errors, district: "" });
                   }}
                   placeholder="Select"
+                  listMode="MODAL"
+                  modalTitle="Select district"
                   style={[styles.dropdown, errors.district && styles.errorBorder]}
                   dropDownContainerStyle={styles.dropdownList}
                 />
@@ -256,6 +258,8 @@ const Request = () => {
                   }}
                   placeholder="Select"
                   disabled={!form.district}
+                  listMode="MODAL"
+                  modalTitle="Select city"
                   style={[styles.dropdown, errors.city && styles.errorBorder]}
                   dropDownContainerStyle={styles.dropdownList}
                 />

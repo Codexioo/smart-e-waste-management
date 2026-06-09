@@ -9,7 +9,10 @@ router.get('/profile', authenticate, (req, res) => {
   const userId = req.user.id;
 
   db.get(
-    `SELECT * FROM users WHERE id = ?`,
+    `SELECT id, username, email, telephone, address, role,
+            total_reward_points, cumulative_reward_points, level,
+            create_date, create_time, profile_image
+     FROM users WHERE id = ?`,
     [userId],
     (err, user) => {
       if (err || !user) {

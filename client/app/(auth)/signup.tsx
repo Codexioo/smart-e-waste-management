@@ -157,6 +157,8 @@ export default function Signup() {
                   setValue={setSelectedRole}
                   setItems={setRoleItems}
                   placeholder="Select your role"
+                  listMode="MODAL"
+                  modalTitle="Select your role"
                   style={[styles.dropdown, errors.selectedRole ? styles.inputError : null]}
                   dropDownContainerStyle={styles.dropdownContainer}
                   textStyle={styles.dropdownText}
