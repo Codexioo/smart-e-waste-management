@@ -3,7 +3,7 @@ import { View, StyleSheet } from "react-native";
 import { Slot } from "expo-router";
 import BottomBar from "@/components/bottombar";
 
-export default function ScreensLayout() {
+export default function CollectorLayout() {
   return (
     <View style={styles.container}>
       <Slot />
@@ -13,7 +13,5 @@ export default function ScreensLayout() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
 });
