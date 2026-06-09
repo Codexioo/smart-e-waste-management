@@ -41,7 +41,7 @@ const citiesByDistrict: Record<string, string[]> = {
 };
 
 const wasteTypes = [
-  { id: 'Plastic', icon: 'bottle-wine-outline' as const },
+  { id: 'Plastic', icon: 'water-outline' as const },
   { id: 'Glass', icon: 'wine-outline' as const },
   { id: 'Metal', icon: 'hardware-chip-outline' as const },
   { id: 'Paper', icon: 'document-text-outline' as const },

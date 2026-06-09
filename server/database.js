@@ -64,6 +64,36 @@ db.run(`
     }
   });
 
+  db.run(`ALTER TABLE pickup_requests ADD COLUMN started_at TEXT`, (err) => {
+    if (err && !err.message.includes('duplicate column')) {
+      console.error('❌ Error adding started_at column:', err);
+    }
+  });
+
+  db.run(`ALTER TABLE pickup_requests ADD COLUMN collected_at TEXT`, (err) => {
+    if (err && !err.message.includes('duplicate column')) {
+      console.error('❌ Error adding collected_at column:', err);
+    }
+  });
+
+  db.run(`ALTER TABLE pickup_requests ADD COLUMN waste_weight REAL`, (err) => {
+    if (err && !err.message.includes('duplicate column')) {
+      console.error('❌ Error adding waste_weight column:', err);
+    }
+  });
+
+  db.run(`ALTER TABLE waste_collections ADD COLUMN collector_id INTEGER REFERENCES users(id)`, (err) => {
+    if (err && !err.message.includes('duplicate column')) {
+      console.error('❌ Error adding collector_id to waste_collections:', err);
+    }
+  });
+
+  db.run(`ALTER TABLE waste_collections ADD COLUMN pickup_request_id INTEGER REFERENCES pickup_requests(id)`, (err) => {
+    if (err && !err.message.includes('duplicate column')) {
+      console.error('❌ Error adding pickup_request_id column:', err);
+    }
+  });
+
   // WASTE COLLECTIONS
   db.run(`
     CREATE TABLE IF NOT EXISTS waste_collections (
