@@ -17,7 +17,7 @@ const RedirectIfLoggedIn: React.FC = () => {
         if (role === "customer") {
           router.replace("/(tabs)/userdashboard");
         } else if (role === "collector") {
-          router.replace("/(auth)/collectordashboard");
+          router.replace("/(collector)/home");
         } else {
           router.replace("/(auth)/loading");
         }

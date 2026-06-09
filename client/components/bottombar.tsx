@@ -40,21 +40,21 @@ const CUSTOMER_TABS: TabItem[] = [
 const COLLECTOR_TABS: TabItem[] = [
   {
     key: "home",
-    route: "/(auth)/collectordashboard",
+    route: "/(collector)/home",
     icon: "home",
-    match: ["collectordashboard"],
+    match: ["/home", "collector-earnings", "collector-performance"],
   },
   {
-    key: "collect",
-    route: "/screens/driver",
-    icon: "car",
-    match: ["driver"],
+    key: "pickups",
+    route: "/(collector)/pickups",
+    icon: "list",
+    match: ["/pickups", "collector-pickup-detail"],
   },
   {
     key: "profile",
-    route: "/screens/profile",
+    route: "/(collector)/profile",
     icon: "person-circle",
-    match: ["screens/profile"],
+    match: ["/profile", "collector-earnings-history"],
   },
 ];
 
@@ -138,11 +138,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
     zIndex: 999,
-    shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 10,
   },
   tabBar: {
     flexDirection: "row",
