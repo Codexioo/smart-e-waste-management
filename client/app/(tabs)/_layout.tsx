@@ -13,7 +13,7 @@ export default function TabLayout() {
     const fetchUserRole = async () => {
       const role = await AsyncStorage.getItem("role");
       if (role === "collector") {
-        router.replace("/(auth)/collectordashboard");
+        router.replace("/(collector)/home");
         return;
       }
       setLoading(false);
